@@ -5,7 +5,7 @@
  * In this context, a word is 4 bytes
  */
 import java.io.*;
-import java.nio.*;
+import java.util.zip.*;
 
 class ResourcePak {
   /**
@@ -43,78 +43,115 @@ class ResourcePak {
    * @throws IOException
    *         When something goes wrong with accessing the .pak archive.
    */
-  public void extract(File output) throws IOException {
-    RandomAccessFile raf = new RandomAccessFile(file, "r");
-
-    // Checks if the file should be unpacked/read by thsi program
-    String header = "EyedentityGames Packing File 0.1";
-    byte[] head = new byte[32];
-    if( raf.read(head) != -1) {
-      String headstr = new String(head, "UTF-8");
-
-      if(new String(head, "UTF-8").equals(header)) {
-        System.out.println("File is a resource pak.");
-      } else {
-        System.out.println("File cannot be read.");
-        return;
-      }
+  public void extract(File output, int fileOffsetStart)
+    throws IOException, DataFormatException
+  {
+    RandomAccessFileLE ptr = new RandomAccessFileLE(file, "r");
+    if(! validHeader(ptr)) {
+      ptr.close();
+      return;
     }
-
-    byte[] word = new byte[4];
 
     /* 0x104 = 260 */
-    raf.seek(260);
-    raf.read(word); // read 4 bytes
-    int fileCount = wordToInt(word);
+    ptr.seek(260);
 
-    raf.read(word);
-    int fileStartOffset = wordToInt(word);
+    // read file count and start offset
+    int count = ptr.readIntLE();
+    long currOffset = ptr.readIntLE();
+    int countLen = String.valueOf(count).length();
 
-    raf.seek(fileStartOffset);
-    byte[] nameBytes = new byte[256];
-    raf.read(nameBytes);
-    String name = new String(nameBytes, "UTF-8");
-    System.out.println("Name: " + name);
+    System.out.println("Total Files: " + count);
 
-    System.out.println("Total Files: " + fileCount);
-    System.out.println("First File Offset: " + fileStartOffset);
+    // creating required data types here
+    String outputText = "%0" + countLen + "d of %d: %s";
+    String path;
+    int size;
+    int zsize;
+    int offset;
+    Inflater inflater = new Inflater();
 
+    currOffset += fileOffsetStart * (256+4+4+4+4+44);
+    for(int i = fileOffsetStart, j = i + 1; i < count; i++, j++) {
+      // reading each file header
+      ptr.seek(currOffset);
+      path = ptr.readString(256);
+      ptr.skipBytes(4); // dummy data
+      size = ptr.readIntLE();
+      zsize = ptr.readIntLE();
+      offset = ptr.readIntLE();
+      ptr.skipBytes(44); // unknown+null padding
 
-    raf.close();
-  }
+      // files are located elsewhere... remember where we were
+      currOffset = ptr.getFilePointer();
+      ptr.seek(offset);
 
+      // like all strings, they end with \0. Also remove all whitespaces.
+      path = path.substring(0, path.indexOf('\0')).trim();
+      System.out.print(String.format(outputText, j, count,
+                                    path.replace('\\','/')));
+      byte[] data = new byte[size]; // actual data
+      byte[] zdata = new byte[zsize]; // zipped data
+      ptr.readFully(zdata);
+      inflater.setInput(zdata);
+      inflater.inflate(data);
 
-  /**
-   * Converts an array of 4 bytes into an INT.
-   * @param b the 4 byte array
-   * @return the int version of the 4 bytes
-   */
-  public int wordToInt(byte[] b) {
-    ByteBuffer buf = ByteBuffer.wrap(b);
-    if(ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN)) {
-      // not sure if needed... I use LE system
-      buf = buf.order(ByteOrder.BIG_ENDIAN);
-    } else { // is LE
-      buf = buf.order(ByteOrder.LITTLE_ENDIAN);
+      File zFile = new File(output, path), zDir = zFile.getParentFile();
+      //System.out.println("\nFile path: " + zFile.getPath());
+      if(! zDir.exists() && ! zFile.getParentFile().mkdirs()) {
+        System.out.print(" FAILED");
+        System.out.print("\n           ");
+        System.out.println("Subdirectories could not be made.");
+        continue;
+      }
+
+      FileOutputStream out = new FileOutputStream(zFile);
+      out.write(data);
+      out.close();
+
+      System.out.println();
     }
 
-    return buf.getInt();
+    System.out.println("Extraction complete!");
+    System.out.println("\n\nTotal Files extracted: " + (count - fileOffsetStart));
+
+    ptr.close();
+  }
+
+  private boolean validHeader(RandomAccessFileLE ptr)
+    throws IOException
+  {
+    String header = "EyedentityGames Packing File 0.1";
+    return ptr.readString(header.length()).equals(header);
   }
 
 
   /** 
-   * java ResourcePak output_dir pak_1 pak_2 ...
+   * java ResourcePak output_dir pak_file [file_offset]
    * output_dir : The directory where the contents of pak files will be
    *              extracted to.
-   * pak_n : The pak file path.
+   * pak_file : The pak file path.
+   * file_offset : [optional] which file to start extracting at.
    */
-  public static void main(String[] files) throws IOException {
-    if(files.length < 2) {
-      System.out.println("java ResourcePak output_dir pak_1 pak_2 ...");
+  public static void main(String[] args)
+    throws IOException, DataFormatException
+  {
+    if(args.length < 2) {
+      System.out.println("java ResourcePak output_dir pak_file [file_offset]");
       System.exit(1);
     }
 
-    File output = new File(files[0]);
+    int fileStart = 1;
+    if(args.length == 3 ) {
+      fileStart = Integer.parseInt(args[2]);
+      if(fileStart < 1) {
+        System.out.println("file_offset parameter must be greater than 0.");
+        System.exit(1);
+      }
+    }
+
+    fileStart--;
+
+    File output = new File(args[0]);
     if(! output.exists()) {
       if (! output.mkdirs()) {
         System.out.println("Cannot create output directory!");
@@ -122,14 +159,13 @@ class ResourcePak {
       }
     }
 
-    for(int i = 1; i < files.length; i++) {
-      File file = new File(files[i]);
-      ResourcePak rp = new ResourcePak(file);
-      if(! rp.valid()) {
-        System.out.println(files[i] + " is not a valid pak file path.");
-      } else {
-        rp.extract(output);
-      }
+
+    File file = new File(args[1]);
+    ResourcePak rp = new ResourcePak(file);
+    if(! rp.valid()) {
+      System.out.println(args[1] + " is not a valid pak file path.");
+    } else {
+      rp.extract(output, fileStart);
     }
   }
 }
