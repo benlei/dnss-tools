@@ -1,8 +1,9 @@
-/* This program is still a work in progress.
- * The purpose of this program is to be able to read and potentially
- * unpack the data from a .pak file and view its contents.
+/**
+ * Data mining program.
+ * The purpose of this program is to be able to read and
+ * unpack the data from various .pak file.
  *
- * In this context, a word is 4 bytes
+ * @author Benjamin Lei
  */
 import java.io.*;
 import java.nio.file.*;
@@ -60,6 +61,8 @@ class Unpacker {
     throws IOException, DataFormatException
   {
     RandomAccessFileLE ptr = new RandomAccessFileLE(file, "r");
+
+    // check that this file is likely a .pak file
     String header = "EyedentityGames Packing File 0.1";
     if(! ptr.readString(header.length()).equals(header)) {
       ptr.close();
@@ -123,10 +126,10 @@ class Unpacker {
 
       System.out.println(String.format(outputText, j, count, path));
 
-      // reset inflater and fill it with data
+      // reset inflater
       inflater.reset();
 
-      // the compressed data
+      // get and store the compressed data and put it into the inflater
       byte[] buf = new byte[zsize];
       ptr.readFully(buf, 0, zsize);
       inflater.setInput(buf, 0, zsize);
