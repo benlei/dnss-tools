@@ -141,7 +141,7 @@ class Unpacker {
 
 
     System.out.println("Extraction complete!");
-    System.out.println("\nTotal Files extracted: " + extracted);
+    System.out.println("\nTotal Files extracted in "+ file.getName()+":" + extracted);
 
     ptr.close();
   }
