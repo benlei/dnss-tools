@@ -68,7 +68,7 @@ class Unpacker {
     int countLen = String.valueOf(count).length();
 
     // creating required data types here
-    String outputText = "%0" + countLen + "d of %d: %s";
+    String outputText = file.getName() + " : %0" + countLen + "d of %d : %s";
     String path;
     int zsize;
     int offset;
