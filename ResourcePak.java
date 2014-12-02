@@ -87,8 +87,7 @@ class ResourcePak {
 
       // like all strings, they end with \0. Also remove all whitespaces.
       path = path.substring(0, path.indexOf('\0')).trim();
-      System.out.print(String.format(outputText, j, count,
-                                    path.replace('\\','/')));
+      System.out.print(String.format(outputText, j, count, path));
       byte[] data = new byte[size]; // actual data
       byte[] zdata = new byte[zsize]; // zipped data
       ptr.readFully(zdata);
@@ -96,7 +95,6 @@ class ResourcePak {
       inflater.inflate(data);
 
       File zFile = new File(output, path), zDir = zFile.getParentFile();
-      //System.out.println("\nFile path: " + zFile.getPath());
       if(! zDir.exists() && ! zFile.getParentFile().mkdirs()) {
         System.out.print(" FAILED");
         System.out.print("\n           ");
