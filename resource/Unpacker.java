@@ -18,7 +18,7 @@ class Unpacker {
   private File file;
 
   /**
-   * Constant buffer size for data
+   * Constant buffer size for data inflation
    */
   public final static int BUFSIZE = 1024 * 10; // 10 KB
 
@@ -49,8 +49,12 @@ class Unpacker {
    *
    * @param output The directory file that the files in the .pak
    *               archive will be extracted to.
+   * @param whiteList the file that lists all paths in the .pak that should
+   *                  be uncompressed.
    * @throws IOException
    *         When something goes wrong with accessing the .pak archive.
+   * @throws DataFormatException
+   *         When something goes wrong when trying to inflate files in the .pak.
    */
   public void extract(File output, List<String> whiteList)
     throws IOException, DataFormatException
@@ -80,7 +84,6 @@ class Unpacker {
     int j = 1;
     int extracted = 0;
 
-    // skips file if needed
     for(int i = 0; i < count; i++, j++) {
       // reading each file header
       ptr.seek(currOffset);
@@ -97,6 +100,7 @@ class Unpacker {
       // like all strings, they end with \0. Also remove all whitespaces.
       path = path.substring(0, path.indexOf('\0')).trim();
 
+      // whitelist file checking
       boolean allowed = true;
       for(String wL : whiteList) {
         if(path.contains(wL)) {
@@ -127,18 +131,17 @@ class Unpacker {
       ptr.readFully(buf, 0, zsize);
       inflater.setInput(buf, 0, zsize);
 
+      // uncompressed data
       FileOutputStream out = new FileOutputStream(zFile);
       while(! inflater.finished()) {
         byte[] inf = new byte[Unpacker.BUFSIZE];
         size = inflater.inflate(inf);
         out.write(inf, 0, size);
       }
-      // write uncompressed blocks to output
-      
+
       out.close();
       extracted++;
     }
-
 
     System.out.println("Extraction complete!");
     System.out.println("Total Files extracted in "+ file.getName()+":" + extracted);
@@ -152,17 +155,23 @@ class Unpacker {
    * output_dir : The directory where the contents of pak files will be
    *              extracted to.
    * pak_file : The pak file path, in quotes; uses glob expressions
-   * white_list : list of files to ignore
+   * white_list : text file containing list of paths/files to allow to extract
+   *
+   * @param args List of arguments to the program.
+   * @throws IOException
+   *         @see extract
+   * @throws DataFormatException
+   *         @see extract
    */
   public static void main(String[] args)
     throws IOException, DataFormatException
   {
     if(args.length < 2) {
-      System.out.println("java Unpacker output_dir pak_file [file_offset]");
+      System.out.println("java Unpacker output_dir pak_file [whitelist]");
       System.exit(1);
     }
 
-
+    // Create output directory if needed
     File output = new File(args[0]);
     if(! output.exists()) {
       if (! output.mkdirs()) {
@@ -171,6 +180,7 @@ class Unpacker {
       }
     }
 
+    // glob file matching to unpack various files.
     File file = new File(args[1]);
     DirectoryStream<Path> dirStream = Files.newDirectoryStream(
                                               Paths.get(file.getParent()),
