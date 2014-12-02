@@ -168,11 +168,11 @@ class Unpacker {
 
 
     File file = new File(args[1]);
-    Unpacker rp = new Unpacker(file);
-    if(! rp.valid()) {
+    Unpacker pak = new Unpacker(file);
+    if(! pak.valid()) {
       System.out.println(args[1] + " is not a valid pak file path.");
     } else {
-      rp.extract(output, fileStart);
+      pak.extract(output, fileStart);
     }
   }
 }
