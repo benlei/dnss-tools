@@ -73,7 +73,6 @@ class Unpacker {
     int zsize;
     int offset;
     Inflater inflater = new Inflater();
-    int totalExtracted = 0;
     int size;
     int j = 1;
 
