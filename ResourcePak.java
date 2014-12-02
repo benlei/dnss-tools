@@ -68,7 +68,7 @@ class ResourcePak {
     int size;
     int zsize;
     int offset;
-    Inflater inflater = new Inflater();
+    
 
     currOffset += fileOffsetStart * (256+4+4+4+4+44);
     for(int i = fileOffsetStart, j = i + 1; i < count; i++, j++) {
@@ -91,6 +91,7 @@ class ResourcePak {
       byte[] data = new byte[size]; // actual data
       byte[] zdata = new byte[zsize]; // zipped data
       ptr.readFully(zdata);
+      Inflater inflater = new Inflater();
       inflater.setInput(zdata);
       inflater.inflate(data);
 
