@@ -11,12 +11,12 @@ http://aluigi.altervista.org/papers/quickbms.txt
 https://code.google.com/p/sagethumbs/
 
 ## Relevent File Locations
-| info            | path                           |
-| ----------------|------------------------------- |
-| icons           | resource/ui/ui/mainbar/mainbar |
-| skill-req icons | resource/ui/ui/skill/skill     |
-| description db  | resource/uistring/uistring     |
-| skill dnt       | resource/ext                   |
+| info            | path                |
+| ----------------|-------------------- |
+| icons           | resource\ui\mainbar |
+| skill-req icons | resource\ui\skill   |
+| description db  | resource\uistring   |
+| skill dnt       | resource\ext        |
 
 ## Extra Notes
 ### File Compression

@@ -6,7 +6,10 @@
  */
 import java.io.*;
 import java.nio.file.*;
+import java.nio.charset.Charset;
 import java.util.zip.*;
+import java.util.List;
+import java.util.Collections;
 
 class Unpacker {
   /**
@@ -49,7 +52,7 @@ class Unpacker {
    * @throws IOException
    *         When something goes wrong with accessing the .pak archive.
    */
-  public void extract(File output)
+  public void extract(File output, List<String> whiteList)
     throws IOException, DataFormatException
   {
     RandomAccessFileLE ptr = new RandomAccessFileLE(file, "r");
@@ -75,6 +78,7 @@ class Unpacker {
     Inflater inflater = new Inflater();
     int size;
     int j = 1;
+    int extracted = 0;
 
     // skips file if needed
     for(int i = 0; i < count; i++, j++) {
@@ -92,6 +96,19 @@ class Unpacker {
 
       // like all strings, they end with \0. Also remove all whitespaces.
       path = path.substring(0, path.indexOf('\0')).trim();
+
+      boolean allowed = true;
+      for(String wL : whiteList) {
+        if(path.contains(wL)) {
+          allowed = true;
+          break;
+        }
+        allowed = false;
+      }
+
+      if(! allowed) {
+        continue;
+      }
 
       // make directory for files
       File zFile = new File(output, path), zDir = zFile.getParentFile();
@@ -119,11 +136,12 @@ class Unpacker {
       // write uncompressed blocks to output
       
       out.close();
+      extracted++;
     }
 
 
     System.out.println("Extraction complete!");
-    System.out.println("\nTotal Files extracted: " + j);
+    System.out.println("\nTotal Files extracted: " + extracted);
 
     ptr.close();
   }
@@ -163,7 +181,12 @@ class Unpacker {
       if(! pak.valid()) {
         System.out.println(args[1] + " is not a valid pak file path.");
       } else {
-        pak.extract(output);
+        List<String> whiteList = Collections.emptyList();
+        if(args.length == 3) {
+          whiteList = Files.readAllLines(new File(args[2]).toPath(),
+                                         Charset.defaultCharset());
+        }
+        pak.extract(output, whiteList);
       }
     }
   }
