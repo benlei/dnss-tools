@@ -1,18 +1,21 @@
-===How To Extract Template===
+# How To Extract Template
 ResourceUnpacker.bms
 
-===BMS API===
+# BMS API
 http://aluigi.altervista.org/papers/quickbms.txt
 
-===DDS Image Converter===
+# DDS Image Converter
 https://code.google.com/p/sagethumbs/
 
-===Relevent File Locations===
-icons             resource/ui/ui/mainbar/mainbar
-skill-req icons   resource/ui/ui/skill/skill
-description db    resource/uistring/uistring
-skill dnt         resource/ext
+# Relevent File Locations
+| info            | path                           |
+| ----------------|------------------------------- |
+| icons           | resource/ui/ui/mainbar/mainbar |
+| skill-req icons | resource/ui/ui/skill/skill     |
+| description db  | resource/uistring/uistring     |
+| skill dnt       | resource/ext                   |
 
-===Extra Notes===
+# Extra Notes
+## File Compression
 Files are compressed using ZLIB.
 Refer to: https://docs.oracle.com/javase/7/docs/api/java/util/zip/Inflater.html
