@@ -5,6 +5,7 @@
  * In this context, a word is 4 bytes
  */
 import java.io.*;
+import java.nio.file.*;
 import java.util.zip.*;
 
 class Unpacker {
@@ -48,7 +49,7 @@ class Unpacker {
    * @throws IOException
    *         When something goes wrong with accessing the .pak archive.
    */
-  public void extract(File output, int fileOffsetStart)
+  public void extract(File output)
     throws IOException, DataFormatException
   {
     RandomAccessFileLE ptr = new RandomAccessFileLE(file, "r");
@@ -73,12 +74,11 @@ class Unpacker {
     int offset;
     Inflater inflater = new Inflater();
     int totalExtracted = 0;
-    byte[] buf = new byte[Unpacker.BUFSIZE]; // 10 KB
     int size;
+    int j = 1;
 
     // skips file if needed
-    currOffset += fileOffsetStart * (256+4+4+4+4+44);
-    for(int i = fileOffsetStart, j = i + 1; i < count; i++, j++, totalExtracted++) {
+    for(int i = 0; i < count; i++, j++) {
       // reading each file header
       ptr.seek(currOffset);
       path = ptr.readString(256);
@@ -107,37 +107,35 @@ class Unpacker {
       inflater.reset();
 
       // the compressed data
-      while(zsize > 0) {
-        size = Math.min(zsize, Unpacker.BUFSIZE);
-        ptr.readFully(buf, 0, size);
-        inflater.setInput(buf, 0, size)
-        zsize -= size;
-      }
-      
-      // write uncompressed blocks to output
+      byte[] buf = new byte[zsize];
+      ptr.readFully(buf, 0, zsize);
+      inflater.setInput(buf, 0, zsize);
+
       FileOutputStream out = new FileOutputStream(zFile);
       while(! inflater.finished()) {
-        size = inflater.inflate(buf); // re-use min var
-        out.write(buf, 0, size);
+        byte[] inf = new byte[Unpacker.BUFSIZE];
+        size = inflater.inflate(inf);
+        out.write(inf, 0, size);
       }
+      // write uncompressed blocks to output
+      
       out.close();
     }
 
-    inflater.end();
 
     System.out.println("Extraction complete!");
-    System.out.println("\nTotal Files extracted: " + totalExtracted);
+    System.out.println("\nTotal Files extracted: " + j);
 
     ptr.close();
   }
 
 
   /** 
-   * java Unpacker output_dir pak_file [file_offset]
+   * java Unpacker output_dir pak_file whitelist
    * output_dir : The directory where the contents of pak files will be
    *              extracted to.
-   * pak_file : The pak file path.
-   * file_offset : [optional] which file to start extracting at.
+   * pak_file : The pak file path, in quotes; uses glob expressions
+   * white_list : list of files to ignore
    */
   public static void main(String[] args)
     throws IOException, DataFormatException
@@ -147,16 +145,6 @@ class Unpacker {
       System.exit(1);
     }
 
-    int fileStart = 1;
-    if(args.length == 3 ) {
-      fileStart = Integer.parseInt(args[2]);
-      if(fileStart < 1) {
-        System.out.println("file_offset parameter must be greater than 0.");
-        System.exit(1);
-      }
-    }
-
-    fileStart--;
 
     File output = new File(args[0]);
     if(! output.exists()) {
@@ -166,13 +154,18 @@ class Unpacker {
       }
     }
 
-
     File file = new File(args[1]);
-    Unpacker pak = new Unpacker(file);
-    if(! pak.valid()) {
-      System.out.println(args[1] + " is not a valid pak file path.");
-    } else {
-      pak.extract(output, fileStart);
+    DirectoryStream<Path> dirStream = Files.newDirectoryStream(
+                                              Paths.get(file.getParent()),
+                                              file.getName());
+
+    for(Path path : dirStream) {
+      Unpacker pak = new Unpacker(path.toFile());
+      if(! pak.valid()) {
+        System.out.println(args[1] + " is not a valid pak file path.");
+      } else {
+        pak.extract(output);
+      }
     }
   }
 }
