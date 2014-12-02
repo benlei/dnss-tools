@@ -60,23 +60,22 @@ class ResourcePak {
     long currOffset = ptr.readIntLE();
     int countLen = String.valueOf(count).length();
 
-    System.out.println("Total Files: " + count);
-
     // creating required data types here
     String outputText = "%0" + countLen + "d of %d: %s";
     String path;
-    int size;
     int zsize;
     int offset;
-    
+    Inflater inflater = new Inflater();
+    int totalExtracted = 0;
+    byte[] buf = new byte[1024 * 10]; // buffer
 
+    // skips file if needed
     currOffset += fileOffsetStart * (256+4+4+4+4+44);
-    for(int i = fileOffsetStart, j = i + 1; i < count; i++, j++) {
+    for(int i = fileOffsetStart, j = i + 1; i < count; i++, j++, totalExtracted++) {
       // reading each file header
       ptr.seek(currOffset);
       path = ptr.readString(256);
-      ptr.skipBytes(4); // dummy data
-      size = ptr.readIntLE();
+      ptr.skipBytes(4+4); // dummy data + the "size" (useless)
       zsize = ptr.readIntLE();
       offset = ptr.readIntLE();
       ptr.skipBytes(44); // unknown+null padding
@@ -87,31 +86,37 @@ class ResourcePak {
 
       // like all strings, they end with \0. Also remove all whitespaces.
       path = path.substring(0, path.indexOf('\0')).trim();
-      System.out.print(String.format(outputText, j, count, path));
-      byte[] data = new byte[size]; // actual data
-      byte[] zdata = new byte[zsize]; // zipped data
-      ptr.readFully(zdata);
-      Inflater inflater = new Inflater();
-      inflater.setInput(zdata);
-      inflater.inflate(data);
 
+      // make directory for files
       File zFile = new File(output, path), zDir = zFile.getParentFile();
       if(! zDir.exists() && ! zFile.getParentFile().mkdirs()) {
-        System.out.print(" FAILED");
-        System.out.print("\n           ");
-        System.out.println("Subdirectories could not be made.");
+        System.out.println("Extraction of "+path+" FAILED");
         continue;
       }
 
-      FileOutputStream out = new FileOutputStream(zFile);
-      out.write(data);
-      out.close();
+      System.out.println(String.format(outputText, j, count, path));
 
-      System.out.println();
+      // the compressed data
+      byte[] zdata = new byte[zsize];
+      ptr.readFully(zdata);
+
+      // reset inflater
+      inflater.reset();
+      inflater.setInput(zdata);
+      
+      // Uncompresses data 10 kb at a time and writes to path
+      FileOutputStream out = new FileOutputStream(zFile);
+      while (!inflater.finished()) {
+        int len = inflater.inflate(buf);
+        out.write(buf, 0, len);      
+      }
+      out.close();
     }
 
+    inflater.end();
+
     System.out.println("Extraction complete!");
-    System.out.println("\n\nTotal Files extracted: " + (count - fileOffsetStart));
+    System.out.println("\nTotal Files extracted: " + totalExtracted);
 
     ptr.close();
   }
