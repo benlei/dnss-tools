@@ -7,18 +7,23 @@
 import java.io.*;
 import java.util.zip.*;
 
-class ResourcePak {
+class Unpacker {
   /**
    * The file object that should be a .pak file.
    */
   private File file;
 
   /**
-   * Creates a ResourcePak instance with the given
+   * Constant buffer size for data
+   */
+  public final static int BUFSIZE = 1024 * 10; // 10 KB
+
+  /**
+   * Creates a Unpacker instance with the given
    * File object. The File object should not be null.
    * @param file  A file object
    */
-  public ResourcePak(File file) {
+  public Unpacker(File file) {
     this.file = file;
   }
 
@@ -47,7 +52,8 @@ class ResourcePak {
     throws IOException, DataFormatException
   {
     RandomAccessFileLE ptr = new RandomAccessFileLE(file, "r");
-    if(! validHeader(ptr)) {
+    String header = "EyedentityGames Packing File 0.1";
+    if(! ptr.readString(header.length()).equals(header)) {
       ptr.close();
       return;
     }
@@ -67,7 +73,8 @@ class ResourcePak {
     int offset;
     Inflater inflater = new Inflater();
     int totalExtracted = 0;
-    byte[] buf = new byte[1024 * 10]; // buffer
+    byte[] buf = new byte[Unpacker.BUFSIZE]; // 10 KB
+    int size;
 
     // skips file if needed
     currOffset += fileOffsetStart * (256+4+4+4+4+44);
@@ -75,7 +82,7 @@ class ResourcePak {
       // reading each file header
       ptr.seek(currOffset);
       path = ptr.readString(256);
-      ptr.skipBytes(4+4); // dummy data + the "size" (useless)
+      ptr.skipBytes(4+4); // dummy data + useless size
       zsize = ptr.readIntLE();
       offset = ptr.readIntLE();
       ptr.skipBytes(44); // unknown+null padding
@@ -96,19 +103,22 @@ class ResourcePak {
 
       System.out.println(String.format(outputText, j, count, path));
 
-      // the compressed data
-      byte[] zdata = new byte[zsize];
-      ptr.readFully(zdata);
-
-      // reset inflater
+      // reset inflater and fill it with data
       inflater.reset();
-      inflater.setInput(zdata);
+
+      // the compressed data
+      while(zsize > 0) {
+        size = Math.min(zsize, Unpacker.BUFSIZE);
+        ptr.readFully(buf, 0, size);
+        inflater.setInput(buf, 0, size)
+        zsize -= size;
+      }
       
-      // Uncompresses data 10 kb at a time and writes to path
+      // write uncompressed blocks to output
       FileOutputStream out = new FileOutputStream(zFile);
-      while (!inflater.finished()) {
-        int len = inflater.inflate(buf);
-        out.write(buf, 0, len);      
+      while(! inflater.finished()) {
+        size = inflater.inflate(buf); // re-use min var
+        out.write(buf, 0, size);
       }
       out.close();
     }
@@ -121,16 +131,9 @@ class ResourcePak {
     ptr.close();
   }
 
-  private boolean validHeader(RandomAccessFileLE ptr)
-    throws IOException
-  {
-    String header = "EyedentityGames Packing File 0.1";
-    return ptr.readString(header.length()).equals(header);
-  }
-
 
   /** 
-   * java ResourcePak output_dir pak_file [file_offset]
+   * java Unpacker output_dir pak_file [file_offset]
    * output_dir : The directory where the contents of pak files will be
    *              extracted to.
    * pak_file : The pak file path.
@@ -140,7 +143,7 @@ class ResourcePak {
     throws IOException, DataFormatException
   {
     if(args.length < 2) {
-      System.out.println("java ResourcePak output_dir pak_file [file_offset]");
+      System.out.println("java Unpacker output_dir pak_file [file_offset]");
       System.exit(1);
     }
 
@@ -165,7 +168,7 @@ class ResourcePak {
 
 
     File file = new File(args[1]);
-    ResourcePak rp = new ResourcePak(file);
+    Unpacker rp = new Unpacker(file);
     if(! rp.valid()) {
       System.out.println(args[1] + " is not a valid pak file path.");
     } else {
