@@ -124,7 +124,8 @@ class Unpacker {
       ptr.seek(currOffset);
 
       // like all strings, they end with \0. Also remove all whitespaces.
-      path = ptr.readString(256).substring(0, path.indexOf('\0')).trim();
+      path = ptr.readString(256);
+      path = path.substring(0, path.indexOf('\0')).trim();
       ptr.skipBytes(4+4); // dummy data + useless size
       zsize = ptr.readIntLE();
       offset = ptr.readIntLE();
@@ -222,7 +223,7 @@ class Unpacker {
           pak.setWhiteList(Files.readAllLines(new File(args[2]).toPath(),
                                          Charset.defaultCharset()));
         }
-        
+
         pak.extract(output);
       }
     }
