@@ -10,7 +10,6 @@ import java.nio.file.*;
 import java.nio.charset.Charset;
 import java.util.zip.*;
 import java.util.List;
-import java.util.Collections;
 
 class Unpacker {
   /**
