@@ -24,12 +24,46 @@ class Unpacker {
   public final static int BUFSIZE = 1024 * 10; // 10 KB
 
   /**
+   * List of paths that should be extracted
+   */
+  private List<String> whiteList;
+
+  /**
    * Creates a Unpacker instance with the given
    * File object. The File object should not be null.
    * @param file  A file object
    */
   public Unpacker(File file) {
     this.file = file;
+  }
+
+  /**
+   * Sets a whitelist of paths/files that we specifically want.
+   * @param whiteList List of paths/files to only allow to extract.
+   */
+  public void setWhiteList(List<String> whiteList) {
+    this.whiteList = whiteList;
+  }
+
+  /**
+   * Checks if a given path is part of the whiteList paths,
+   * and if it isn't then return false.
+   * @param path the path from the resource pak considered to be extracted.
+   * @return true if there is no whitelist or if path is part of a whitelist
+   *              path, false otherwise.
+   */
+  public boolean canExtract(String path) {
+    if(whiteList == null) {
+      return true;
+    }
+
+    for(String wL : whiteList) {
+      if(path.contains(wL)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -50,14 +84,12 @@ class Unpacker {
    *
    * @param output The directory file that the files in the .pak
    *               archive will be extracted to.
-   * @param whiteList the file that lists all paths in the .pak that should
-   *                  be uncompressed.
    * @throws IOException
    *         When something goes wrong with accessing the .pak archive.
    * @throws DataFormatException
    *         When something goes wrong when trying to inflate files in the .pak.
    */
-  public void extract(File output, List<String> whiteList)
+  public void extract(File output)
     throws IOException, DataFormatException
   {
     RandomAccessFileLE ptr = new RandomAccessFileLE(file, "r");
@@ -88,9 +120,11 @@ class Unpacker {
     int extracted = 0;
 
     for(int i = 0; i < count; i++, j++) {
-      // reading each file header
+      // set/reset current file pointer
       ptr.seek(currOffset);
-      path = ptr.readString(256);
+
+      // like all strings, they end with \0. Also remove all whitespaces.
+      path = ptr.readString(256).substring(0, path.indexOf('\0')).trim();
       ptr.skipBytes(4+4); // dummy data + useless size
       zsize = ptr.readIntLE();
       offset = ptr.readIntLE();
@@ -100,31 +134,21 @@ class Unpacker {
       currOffset = ptr.getFilePointer();
       ptr.seek(offset);
 
-      // like all strings, they end with \0. Also remove all whitespaces.
-      path = path.substring(0, path.indexOf('\0')).trim();
-
       // whitelist file checking
-      boolean allowed = true;
-      for(String wL : whiteList) {
-        if(path.contains(wL)) {
-          allowed = true;
-          break;
-        }
-        allowed = false;
-      }
-
-      if(! allowed) {
+      if(! canExtract(path)) {
         continue;
       }
 
+      // output what is about to be extracted
+      System.out.println(String.format(outputText, j, count, path));
+
       // make directory for files
-      File zFile = new File(output, path), zDir = zFile.getParentFile();
-      if(! zDir.exists() && ! zFile.getParentFile().mkdirs()) {
+      File zFile = new File(output, path);
+      File zDir = zFile.getParentFile();
+      if(! zDir.exists() && ! zDir.mkdirs()) {
         System.out.println("Extraction of "+path+" FAILED");
         continue;
       }
-
-      System.out.println(String.format(outputText, j, count, path));
 
       // reset inflater
       inflater.reset();
@@ -194,12 +218,12 @@ class Unpacker {
       if(! pak.valid()) {
         System.out.println(args[1] + " is not a valid pak file path.");
       } else {
-        List<String> whiteList = Collections.emptyList();
-        if(args.length == 3) {
-          whiteList = Files.readAllLines(new File(args[2]).toPath(),
-                                         Charset.defaultCharset());
+        if(args.length == 3) { // set whitelist
+          pak.setWhiteList(Files.readAllLines(new File(args[2]).toPath(),
+                                         Charset.defaultCharset()));
         }
-        pak.extract(output, whiteList);
+        
+        pak.extract(output);
       }
     }
   }
