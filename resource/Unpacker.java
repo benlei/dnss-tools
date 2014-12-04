@@ -178,10 +178,10 @@ class Unpacker {
 
 
   /** 
-   * java Unpacker output_dir pak_file whitelist
+   * java Unpacker pak_file output_dir whitelist
+   * pak_file : The pak file path, in quotes; uses glob expressions
    * output_dir : The directory where the contents of pak files will be
    *              extracted to.
-   * pak_file : The pak file path, in quotes; uses glob expressions
    * white_list : text file containing list of paths/files to allow to extract
    *
    * @param args List of arguments to the program.
@@ -194,25 +194,17 @@ class Unpacker {
     throws IOException, DataFormatException
   {
     if(args.length < 2) {
-      System.out.println("java Unpacker output_dir pak_file [whitelist]");
+      System.out.println("java Unpacker pak_file output_dir [whitelist]");
       System.exit(1);
     }
 
-    // Create output directory if needed
-    File output = new File(args[0]);
-    if(! output.exists()) {
-      if (! output.mkdirs()) {
-        System.out.println("Cannot create output directory!");
-        System.exit(1);
-      }
-    }
-
     // glob file matching to unpack various files.
-    File file = new File(args[1]);
+    File file = new File(args[0]);
     DirectoryStream<Path> dirStream = Files.newDirectoryStream(
                                               Paths.get(file.getParent()),
                                               file.getName());
 
+    File output = new File(args[1]);
     for(Path path : dirStream) {
       Unpacker pak = new Unpacker(path.toFile());
       if(! pak.valid()) {
