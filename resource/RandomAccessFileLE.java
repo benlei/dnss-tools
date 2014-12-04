@@ -23,7 +23,7 @@ class RandomAccessFileLE extends RandomAccessFile {
     int ch4 = this.read();
     if ((ch1 | ch2 | ch3 | ch4) < 0)
       throw new EOFException();
-    return ((ch4 << 24) + (ch3 << 16) + (ch2 << 8) + (ch1 << 0));
+    return ((ch4 << 24) | (ch3 << 16) | (ch2 << 8) | (ch1 << 0));
   }
 
   public String readString(int len)

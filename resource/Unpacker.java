@@ -204,7 +204,7 @@ class Unpacker {
                                               Paths.get(file.getParent()),
                                               file.getName());
 
-    File output = new File(args[1]);
+    File output = new File(args[1]).getCanonicalFile();
     for(Path path : dirStream) {
       Unpacker pak = new Unpacker(path.toFile());
       if(! pak.valid()) {
