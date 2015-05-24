@@ -1,4 +1,4 @@
-package dnss.tools.dnt;
+package dnss.tools.dnt.sql;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

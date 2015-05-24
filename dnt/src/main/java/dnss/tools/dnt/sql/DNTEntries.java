@@ -1,4 +1,4 @@
-package dnss.tools.dnt;
+package dnss.tools.dnt.sql;
 
 import java.util.ArrayList;
 import java.util.Map;

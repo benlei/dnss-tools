@@ -1,8 +1,6 @@
 package dnss.tools.pak.extract;
 
 import dnss.tools.pak.Pak;
-import org.ini4j.Config;
-import org.ini4j.IniPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,10 +17,6 @@ import java.util.regex.Pattern;
 public class Main {
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
     private final static String DEFAULT_INI = "pak.ini";
-
-    static {
-        Config.getGlobal().setEscape(false);
-    }
 
     private static void showManual() {
         System.out.println("Usage: pakx [INI_FILE]");
@@ -50,7 +44,7 @@ public class Main {
         }
 
         long startTime = System.currentTimeMillis();
-        Preferences ini = new IniPreferences(input);
+        Preferences ini = Pak.getIni(input);
 
         LOG.info("===================================================================");
         LOG.info("PakExtractor Properties");
@@ -154,7 +148,10 @@ public class Main {
             LOG.info(String.format(format, name, "total", parser.getTotalFiles()));
             LOG.info(String.format(format, name, "extracted", parser.getExtractedFiles()));
             LOG.info(String.format(format, name, "skipped", parser.getSkippeddFiles()));
-            LOG.info(String.format(format, name, "ignored", parser.getIgnoredFiles()));
+
+            if (parser.getSkippeddFiles() != parser.getIgnoredFiles()) {
+                LOG.info(String.format(format, name, "ignored", parser.getIgnoredFiles()));
+            }
         }
 
         LOG.info("===================================================================");

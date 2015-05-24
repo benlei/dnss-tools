@@ -1,13 +1,16 @@
-package dnss.tools.dnt.iterators;
+package dnss.tools.dnt.sql.iterators;
 
+import java.io.File;
 import java.util.Iterator;
 
 /**
  * Created by Ben on 5/23/2015.
  */
-public class XML implements Iterator<Object>, Iterable<Object> {
-    public XML() {
+public class DNT implements Iterator<Object>, Iterable<Object> {
+    private File file;
 
+    public DNT(File file) {
+        this.file = file;
     }
 
     @Override

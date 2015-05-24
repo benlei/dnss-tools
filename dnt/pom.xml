@@ -51,8 +51,16 @@
 				<configuration>
 					<programs>
 						<program>
-							<mainClass>dnss.tools.dnt.Main</mainClass>
-							<id>dnt</id>
+							<mainClass>dnss.tools.dnt.sql.Main</mainClass>
+							<id>dnt-sql</id>
+						</program>
+						<program>
+							<mainClass>dnss.tools.dnt.json.Main</mainClass>
+							<id>sql-json</id>
+						</program>
+						<program>
+							<mainClass>dnss.tools.dnt.xml.Main</mainClass>
+							<id>sql-xml</id>
 						</program>
 					</programs>
 				</configuration>

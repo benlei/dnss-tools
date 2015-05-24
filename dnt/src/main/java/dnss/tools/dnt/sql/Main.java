@@ -1,4 +1,4 @@
-package dnss.tools.dnt;
+package dnss.tools.dnt.sql;
 
 import org.ini4j.IniPreferences;
 import org.slf4j.Logger;

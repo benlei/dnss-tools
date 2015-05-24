@@ -99,7 +99,6 @@ public class PakParser implements Runnable {
                     PakContent content = new PakContent(this, path, resolve(path), fileSize, compressedSize, streamOffset);
                     queue.add(content);
                 } else {
-                    incrementSkippedFiles();
                     incrementIgnoredFiles();
                 }
                 parsed++;

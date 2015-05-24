@@ -1,8 +1,12 @@
 package dnss.tools.pak;
 
 import dnss.tools.pak.extract.PakParser;
+import org.ini4j.Config;
+import org.ini4j.IniPreferences;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -65,6 +69,11 @@ public class Pak {
 
     public static void setSkipDeleted(boolean skipDeleted) {
         Pak.skipDeleted = skipDeleted;
+    }
+
+    public static IniPreferences getIni(InputStream input) throws IOException {
+        Config.getGlobal().setEscape(false);
+        return new IniPreferences(input);
     }
 
     public static boolean isParsingDone() {
