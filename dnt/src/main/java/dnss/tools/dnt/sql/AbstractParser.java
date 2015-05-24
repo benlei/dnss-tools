@@ -25,10 +25,6 @@ public abstract class AbstractParser implements Runnable {
         this.file = file;
     }
 
-    public Connection getConn() {
-        return conn;
-    }
-
     public File getFile() {
         return file;
     }
@@ -131,9 +127,9 @@ public abstract class AbstractParser implements Runnable {
     @Override
     public void run() {
         try {
-            LOG.info("Starting to parse " + file.getAbsolutePath());
+            LOG.info("START: Parsing " + file.getAbsolutePath() + " into `" + getName() + "`");
             parse();
-            LOG.info(file.getAbsolutePath() + " has been put into the SQL table " + getName());
+            LOG.info("END: Finished " + file.getAbsolutePath() + " into `" + getName() + "`");
         } catch (Exception e) {
             LOG.error("There was an error when parsing " + file.getAbsolutePath(), e);
         }
