@@ -9,11 +9,13 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
@@ -93,8 +95,13 @@ public class PakParser implements Runnable {
                 path = new String(pathBytes);
                 path = path.substring(0, path.indexOf('\0')).trim();
 
-                PakContent content = new PakContent(this, path, resolve(path), fileSize, compressedSize, streamOffset);
-                queue.add(content);
+                if (isExtractable(path)) {
+                    PakContent content = new PakContent(this, path, resolve(path), fileSize, compressedSize, streamOffset);
+                    queue.add(content);
+                } else {
+                    incrementSkippedFiles();
+                    incrementIgnoredFiles();
+                }
                 parsed++;
             }
             buf.clear(); // need to clear buffer for reading in more data
@@ -151,6 +158,30 @@ public class PakParser implements Runnable {
         }
 
         return map.get(dir.getAbsolutePath());
+    }
+
+    private boolean isExtractable(String path) {
+        boolean allowed = false, ignored = false;
+
+        ArrayList<Pattern> allowPatterns = Pak.getWhiteList();
+        if (allowPatterns.size() != 0) {
+            for (Pattern pattern : allowPatterns) {
+                allowed |= pattern.matcher(path).find();
+            }
+        } else {
+            allowed = true;
+        }
+
+        ArrayList<Pattern> ignorePatterns = Pak.getBlackList();
+        if (ignorePatterns.size() != 0) {
+            for (Pattern pattern : ignorePatterns) {
+                ignored |= pattern.matcher(path).find();
+            }
+        } else {
+            ignored = false;
+        }
+
+        return allowed && ! ignored;
     }
 
     public void run() {

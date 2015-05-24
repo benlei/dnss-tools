@@ -56,42 +56,12 @@ public class PakContent implements Runnable {
         return streamOffset;
     }
 
-    private boolean isExtractable() {
-        boolean allowed = false, ignored = false;
-
-        ArrayList<Pattern> allowPatterns = Pak.getWhiteList();
-        if (allowPatterns.size() != 0) {
-            for (Pattern pattern : allowPatterns) {
-                allowed |= pattern.matcher(getPakPath()).find();
-            }
-        } else {
-            allowed = true;
-        }
-
-        ArrayList<Pattern> ignorePatterns = Pak.getBlackList();
-        if (ignorePatterns.size() != 0) {
-            for (Pattern pattern : ignorePatterns) {
-                ignored |= pattern.matcher(pakPath).find();
-            }
-        } else {
-            ignored = false;
-        }
-
-        return allowed && ! ignored;
-    }
 
     public void extract() throws IOException, DataFormatException {
         Pak.Log log = Pak.getLog();
         String outputPakPath = pakPath;
 
-        if (! isExtractable()) {
-            if (log.showIgnored()) {
-                LOG.warn("[ ] " + destination.getAbsolutePath());
-            }
-            parser.incrementIgnoredFiles();
-            parser.incrementSkippedFiles();
-            return;
-        } else if (Pak.isSkipDeleted() && fileSize == 0) {
+        if (Pak.isSkipDeleted() && fileSize == 0) {
             if (log.showDeleted()) {
                 LOG.warn("[d] " + destination.getAbsolutePath());
             }
