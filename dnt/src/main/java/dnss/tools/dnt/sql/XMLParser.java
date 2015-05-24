@@ -8,78 +8,57 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.CharacterData;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.charset.Charset;
+import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.AbstractMap;
 
-
-public class XMLParser implements Runnable {
+public class XMLParser extends AbstractParser {
     private final static Logger log = LoggerFactory.getLogger(DNTParser.class);
-    final protected static char[] hex = "0123456789ABCDEF".toCharArray();
 
-    private DNT dnt;
-
-    public XMLParser(DNT dnt) {
-        this.dnt = dnt;
+    public XMLParser(Connection conn, File file) {
+        super(conn, file);
     }
 
-    public void parse() throws IOException {
+    public void parse() throws Exception {
+        File file = getFile();
         Document document;
         try {
-            document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(dnt.getLocation());
+            document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file);
             document.getDocumentElement().normalize();
         } catch (Exception e) {
             log.error("Could not open XML document", e);
             return;
         }
 
-        ArrayList<Map.Entry<String, Types>> fieldList = new ArrayList<Map.Entry<String, Types>>();
-        DNTFields fields = new DNTFields(dnt);
-        fieldList.add(new AbstractMap.SimpleEntry(DNTFields.id, Types.INT));
-        fieldList.add(new AbstractMap.SimpleEntry<String, Types>("_Data", Types.STRING));
-        fields.accumulate(fieldList.get(1));
+        Map<String, Types> fields = new LinkedHashMap<>();
+        fields.put("_mid", Types.INTEGER);
+        fields.put("_cdata", Types.STRING);
+        recreateTable(fields);
 
-        DNTEntries entries = new DNTEntries(dnt, fieldList);
+
         NodeList nodeList = document.getElementsByTagName("message");
         for (int i = 0; i < nodeList.getLength(); i++) {
-            ArrayList<Object> values = new ArrayList<Object>();
+            ArrayList<Object> values = new ArrayList<>();
             Element element = (Element) nodeList.item(i);
             CharacterData characterData = (CharacterData)element.getFirstChild();
             values.add(Integer.valueOf(element.getAttribute("mid"))); // first col: message id
-            values.add(new String(characterData.getData().getBytes(), Charset.forName("UTF-8"))); // second col: the data (to utf8)
-            entries.accumulate(values);
+            values.add(new String(characterData.getData().getBytes())); // second col: cdata
+//            values.add(new String(characterData.getData().getBytes(), Charset.forName("UTF-8"))); // second col: the data (to utf8)
+            insert(values);
         }
-
-
-        File destination = dnt.getDestination();
-        File destinationDir = destination.getParentFile();
-
-        synchronized (DNTParser.LOCK) {
-            if (!destinationDir.exists() && !destinationDir.mkdirs()) {
-                throw new IOException("Unable to create directory " + destinationDir.getPath());
-            }
-        }
-
-        BufferedWriter writer = new BufferedWriter(new FileWriter(destination));
-        writer.write(""); // empty the file
-        writer.append(fields.dissipate());
-        writer.append(entries.dissipate());
-        writer.close();
     }
 
     @Override
-    public void run() {
-        try {
-            Thread.currentThread().setName(dnt.getId());
-            parse();
-            log.info(dnt.getLocation().getPath() + " has successfully converted to " + dnt.getDestination().getPath());
-        } catch (IOException e) {
-            log.error("There was an error when parsing " + dnt.getLocation().getPath(), e);
-        }
+    public String getName() {
+        String name = super.getName();
+        name = name.substring(0, name.length() - 4); // remove extension
+        return name;
+    }
+
+    @Override
+    public String getThreadName() {
+        return "XML-"+getName();
     }
 }

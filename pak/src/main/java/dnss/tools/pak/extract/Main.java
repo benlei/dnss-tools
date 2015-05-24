@@ -19,7 +19,7 @@ public class Main {
     private final static String DEFAULT_INI = "pak.ini";
 
     private static void showManual() {
-        System.out.println("Usage: pakx [INI_FILE]");
+        System.out.println("Usage: pak [INI_FILE]");
         System.out.println("'pak' Uses the ini file options to extract pak file(s).");
         System.out.println();
         System.out.println("Examples:");
@@ -28,6 +28,7 @@ public class Main {
     }
 
     public static void main(String[] args) throws Exception {
+        long startTime = System.currentTimeMillis();
         InputStream input;
         switch (args.length) {
             case 0:
@@ -43,7 +44,6 @@ public class Main {
                 return;
         }
 
-        long startTime = System.currentTimeMillis();
         Preferences ini = Pak.getIni(input);
 
         LOG.info("===================================================================");

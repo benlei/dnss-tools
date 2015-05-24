@@ -1,121 +1,92 @@
 package dnss.tools.dnt.sql;
 
-import org.ini4j.IniPreferences;
+import dnss.tools.dnt.DNT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.List;
+import java.util.Queue;
 import java.util.prefs.Preferences;
 
 public class Main {
-    private final static Logger log = LoggerFactory.getLogger(Main.class);
+    private final static Logger LOG = LoggerFactory.getLogger(Main.class);
+    private final static String DEFAULT_INI = "dnt.ini";
 
-    private final static String DEFAULT = "dnt.ini";
-
-    private static Preferences ini;
-
+    private static void showManual() {
+        System.out.println("Usage: dnt-sql [INI_FILE]");
+        System.out.println("'dnt-sql' converts relevant DNT files to SQL tables");
+        System.out.println();
+        System.out.println("Examples:");
+        System.out.println("  dnt\t\t# Uses the default dnt.ini to converts SQL");
+        System.out.println("  dnt \"C:\\dnt.ini\" \t\t# Uses the C:\\dnt.ini file settings to convert");
+    }
 
     public static void main(String[] args) throws Exception {
+        long startTime = System.currentTimeMillis();
         InputStream input;
         if (args.length > 1) {
-            throw new Exception("Too many arguments");
+            showManual();
+            return;
         } else if (args.length == 1) {
             input = new FileInputStream(args[0]);
         } else {
-            input = Main.class.getClassLoader().getResourceAsStream(DEFAULT);
+            input = Main.class.getClassLoader().getResourceAsStream(DEFAULT_INI);
         }
 
-        ini = new IniPreferences(input);
+        Preferences ini = DNT.getIni(input);
 
-        // get list of dnts
-        HashSet<String> dnt = new HashSet<>(Arrays.asList(ini.keys()));
-        dnt.remove("system");
-        dnt.remove("uistring");
+        // SQL conn
+        Preferences sql = ini.node("sql");
+        Connection conn = DriverManager.getConnection(
+                sql.get("url", null),
+                sql.get("user", null),
+                sql.get("pass", null));
+        DNT.setLogQueries(sql.getBoolean("log_queries", DNT.isLogQueries()));
 
-        // Get system information
-        Preferences system = ini.node("system");
-        ini.remove("system");
+        // auto commit off
+        conn.setAutoCommit(false);
 
-//        // SQL conn
-//        Preferences sql = ini.node("sql");
-//        ini.remove("sql");
-//        Connection conn = DriverManager.getConnection(
-//                sql.get("url", null),
-//                sql.get("user", null),
-//                sql.get("pass", null));
-//
-//
-//        // turn off auto commit because we're going to insert a bunch of stuff
-//        conn.setAutoCommit(false);
-//
-//        // do the iterations
-//
-//
-//
-//        // put everything together
-//        conn.commit();
-//        conn.close();
 
-        /*
-        Properties properties = new Properties();
-        byte[] propertiesBytes = new byte[input.available()];
-        input.read(propertiesBytes);
-        properties.load(new StringReader((new String(propertiesBytes)).replace("\\","\\\\")));
-        input.close();
+        Preferences pak = ini.node("pak");
+        File root = new File(pak.get("root", null));
+        File ext = new File(root, "resource/ext");
+        List<File> files = Arrays.asList(ext.listFiles((dir, name) -> name.endsWith(".dnt")));
 
-        // set the system properties
-        int maxThreads = Integer.valueOf(properties.getProperty("system.max.threads", System.getProperty("max.threads", "1")));
-        System.setProperty("max.threads", String.valueOf(maxThreads));
+        // start queueing up the jobs
+        Queue<Runnable> queue = DNT.getQueue();
 
-        // ordinary dnt properties
-        HashMap<String, DNT> dntMap = new HashMap<String, DNT>();
-        for (String name : properties.stringPropertyNames()) {
-            if (! name.startsWith("dnt.")) {
-                continue;
-            }
-
-            String dntId = name.substring(4);
-            dntId = dntId.substring(0, dntId.indexOf('.'));
-            if (! dntMap.containsKey(dntId)) {
-                String prefix = "dnt." + dntId + ".";
-
-                DNT dnt = new DNT();
-                dnt.setId(dntId);
-                dnt.setLocation(new File(properties.getProperty(prefix + "location")));
-                dnt.setDestination(new File(properties.getProperty(prefix + "destination")));
-                dntMap.put(dntId, dnt);
-            }
+        // First add the uistring
+        queue.add(new XMLParser(conn, new File(root, "resource/uistring/uistring.xml")));
+        for (File file : files) {
+            queue.add(new DNTParser(conn, file));
         }
 
-        // add message table
-        if (properties.containsKey("xml.uistring.location")) {
-            DNT dnt = new DNT();
-            dnt.setId("messages");
-            dnt.setLocation(new File(properties.getProperty("xml.uistring.location")));
-            dnt.setDestination(new File(properties.getProperty("xml.uistring.destination")));
-            dntMap.put("messages", dnt);
+
+        // start the workers
+        Thread[] threads = new Thread[Math.max(Runtime.getRuntime().availableProcessors(), 1)];
+        for (int i = 0; i < threads.length; i++) {
+            threads[i] = new Thread(new Worker());
+            threads[i].start();
         }
 
-        ExecutorService service = Executors.newFixedThreadPool(maxThreads);
-        for (DNT dnt : dntMap.values()) {
-            Runnable parser;
-            if (dnt.getId().equals("messages")) {
-                parser = new XMLParser(dnt);
-            } else {
-                parser = new DNTParser(dnt);
-            }
-            service.submit(parser);
+
+        // wait for all workers to finish
+        for (int i = 0; i < threads.length; i++) {
+            threads[i].join();
         }
 
-        service.shutdown();
-        try {
-            service.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        } catch (InterruptedException e) {
-            log.error("Parser has been interrupted!", e);
-        }
-        */
+        conn.commit();
+        conn.close();
+
+        long endTime = System.currentTimeMillis();
+        LOG.info("===================================================================");
+        LOG.info("[system] workers = " + threads.length);
+        LOG.info("[system] runtime = " + (endTime - startTime) + " ms");
     }
 }
