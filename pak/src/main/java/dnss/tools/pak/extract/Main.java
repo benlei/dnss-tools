@@ -26,11 +26,11 @@ public class Main {
 
     private static void showManual() {
         System.out.println("Usage: pakx [INI_FILE]");
-        System.out.println("'pakx' Uses the ini file options to extract pak file(s).");
+        System.out.println("'pak' Uses the ini file options to extract pak file(s).");
         System.out.println();
         System.out.println("Examples:");
-        System.out.println("  pakx\t\t# Uses the default pak.ini to extract pak files.");
-        System.out.println("  pakx \"C:\\pak.ini\" \t\t# Uses the C:\\pak.ini file settings to extract pak files.");
+        System.out.println("  pak\t\t# Uses the default pak.ini to extract pak files.");
+        System.out.println("  pak \"C:\\pak.ini\" \t\t# Uses the C:\\pak.ini file settings to extract pak files.");
     }
 
     public static void main(String[] args) throws Exception {
