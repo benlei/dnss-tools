@@ -1,14 +1,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <name>DN Tools</name>
+    <modules>
+        <module>pak</module>
+        <module>dnt</module>
+        <module>updater</module>
+    </modules>
     <artifactId>dnss-tools</artifactId>
     <groupId>dnss</groupId>
     <version>2.0</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <properties>
         <slf4j.version>1.7.10</slf4j.version>
         <logback.version>1.1.2</logback.version>
+        <ini4j.version>0.5.4</ini4j.version>
     </properties>
     
     <dependencies>
@@ -27,6 +33,11 @@
             <artifactId>logback-core</artifactId>
             <version>${logback.version}</version>
         </dependency>
+	    <dependency>
+            <groupId>org.ini4j</groupId>
+            <artifactId>ini4j</artifactId>
+            <version>${ini4j.version}</version>
+        </dependency>
     </dependencies>
 
     <scm>
@@ -38,33 +49,9 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>appassembler-maven-plugin</artifactId>
-                <version>1.9</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>assemble</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <programs>
-                        <program>
-                            <mainClass>dnss.tools.pak.Main</mainClass>
-                            <id>pak</id>
-                        </program>
-                        <program>
-                            <mainClass>dnss.tools.dnt.Main</mainClass>
-                            <id>dnt</id>
-                        </program>
-                    </programs>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+		        <version>3.3</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
