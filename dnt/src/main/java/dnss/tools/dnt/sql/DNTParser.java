@@ -7,6 +7,7 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -15,7 +16,7 @@ import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static java.nio.channels.FileChannel.MapMode.READ_ONLY;
 
 public class DNTParser extends AbstractParser {
-    private final static Logger log = LoggerFactory.getLogger(DNTParser.class);
+    private final static Logger LOG = LoggerFactory.getLogger(DNTParser.class);
 
     public DNTParser(Connection conn, File file) {
         super(conn, file);
@@ -28,15 +29,12 @@ public class DNTParser extends AbstractParser {
         ByteBuffer buf = channel.map(READ_ONLY, 4, getFile().length() - 4); // it's already flipped
         buf.order(LITTLE_ENDIAN);
 
-
-
         // # of cols EXCLUDING the Id column.
         int numCols = buf.getShort();
         int numRows = buf.getInt();
 
-
         Map<String, Types> fields = new LinkedHashMap<>();
-        fields.put("_id", Types.INTEGER);
+        fields.put("_Id", Types.INTEGER);
         for (int i = 0; i < numCols; i++) {
             byte[] fieldNameBytes = new byte[buf.getShort()];
             buf.get(fieldNameBytes);
@@ -65,7 +63,11 @@ public class DNTParser extends AbstractParser {
                 }
             }
 
-            insert(values);
+            try {
+                insert(values);
+            } catch (SQLException e) {
+                LOG.warn(e.getMessage(), e);
+            }
         }
 
         channel.close();
@@ -81,6 +83,6 @@ public class DNTParser extends AbstractParser {
 
     @Override
     public String getThreadName() {
-        return "DNT-" + getName();
+        return "DNT";
     }
 }

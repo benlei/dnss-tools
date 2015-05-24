@@ -10,12 +10,13 @@ import org.w3c.dom.CharacterData;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class XMLParser extends AbstractParser {
-    private final static Logger log = LoggerFactory.getLogger(DNTParser.class);
+    private final static Logger LOG = LoggerFactory.getLogger(DNTParser.class);
 
     public XMLParser(Connection conn, File file) {
         super(conn, file);
@@ -28,13 +29,13 @@ public class XMLParser extends AbstractParser {
             document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file);
             document.getDocumentElement().normalize();
         } catch (Exception e) {
-            log.error("Could not open XML document", e);
+            LOG.error("Could not open XML document", e);
             return;
         }
 
         Map<String, Types> fields = new LinkedHashMap<>();
-        fields.put("_mid", Types.INTEGER);
-        fields.put("_cdata", Types.STRING);
+        fields.put("_Mid", Types.INTEGER);
+        fields.put("_CData", Types.STRING);
         recreateTable(fields);
 
 
@@ -43,10 +44,14 @@ public class XMLParser extends AbstractParser {
             ArrayList<Object> values = new ArrayList<>();
             Element element = (Element) nodeList.item(i);
             CharacterData characterData = (CharacterData)element.getFirstChild();
+            byte[] cdata = characterData.getData().getBytes();
             values.add(Integer.valueOf(element.getAttribute("mid"))); // first col: message id
-            values.add(new String(characterData.getData().getBytes())); // second col: cdata
-//            values.add(new String(characterData.getData().getBytes(), Charset.forName("UTF-8"))); // second col: the data (to utf8)
-            insert(values);
+            values.add(new String(cdata)); // second col: cdata
+            try {
+                insert(values);
+            } catch (SQLException e) {
+                LOG.warn(e.getMessage(), e);
+            }
         }
     }
 
@@ -59,6 +64,6 @@ public class XMLParser extends AbstractParser {
 
     @Override
     public String getThreadName() {
-        return "XML-"+getName();
+        return "XML";
     }
 }

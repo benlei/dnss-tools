@@ -73,7 +73,7 @@ public abstract class AbstractParser implements Runnable {
     }
 
 
-    public void insert(List<Object> list) throws Exception {
+    public void insert(List<Object> list) throws SQLException {
         String query = "INSERT INTO " + getName() + " VALUES(";
 
         for (int i = 0; i < list.size(); i++) {
@@ -111,6 +111,9 @@ public abstract class AbstractParser implements Runnable {
             }
 
             stmt.executeUpdate();
+        } catch (SQLException e) {
+            LOG.warn("The following query failed: " + stmt.toString());
+            throw e;
         } finally {
             stmt.close();
         }
@@ -127,9 +130,9 @@ public abstract class AbstractParser implements Runnable {
     @Override
     public void run() {
         try {
-            LOG.info("START: Parsing " + file.getAbsolutePath() + " into `" + getName() + "`");
+            LOG.info("START: Creating " + getName() + " from " + file.getAbsolutePath());
             parse();
-            LOG.info("END: Finished " + file.getAbsolutePath() + " into `" + getName() + "`");
+            LOG.info("END: Creating " + getName() + " from " + file.getAbsolutePath());
         } catch (Exception e) {
             LOG.error("There was an error when parsing " + file.getAbsolutePath(), e);
         }
