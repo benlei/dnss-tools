@@ -121,6 +121,7 @@ public class PakContent implements Runnable {
                 } while (outputFile.exists());
 
                 Files.move(destination.toPath(), outputFile.toPath());
+                LOG.info("Moved " + destination.getAbsolutePath() + " to " + outputFile.getAbsolutePath());
             }
 
             FileOutputStream outStream = new FileOutputStream(destination);
