@@ -6,8 +6,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.regex.Pattern;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
@@ -143,5 +141,10 @@ public class PakContent implements Runnable {
             LOG.warn("Could not extract to " + destination.getAbsolutePath() + ": " + e.getMessage(), e);
             parser.incrementSkippedFiles();
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Content-" + parser.getPakName();
     }
 }

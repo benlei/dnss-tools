@@ -1,5 +1,6 @@
 package dnss.tools.pak.extract;
 
+import dnss.tools.common.worker.Worker;
 import dnss.tools.pak.Pak;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,22 +118,29 @@ public class Main {
             LOG.info("[pak] " + file.getName() + " = " + file.getAbsolutePath());
         }
 
-        // Put each pak file into a parser to be parsed
-        List<PakParser> parsers = Pak.getParsers();
+
+        // the queue and parser
         Queue<Runnable> queue = Pak.getQueue();
+        List<PakParser> parsers = Pak.getParsers();
+
+        // condition for workers to stay alive:
+        // 1) more incoming parsers
+        // 2) queue is not empty
+        // 3) parsing is not done
+        Worker.setQueue(queue);
+        Worker.setCondition(condition -> files.size() != parsers.size() || ! condition || ! Pak.isParsingDone());
+
+        Thread[] threads = new Thread[Worker.MAX_WORKERS];
+        for (int i = 0; i < threads.length; i++) {
+            threads[i] = new Worker();
+            threads[i].start();
+        }
+
         for (File file : files) {
             PakParser parser = new PakParser(file);
             parsers.add(parser);
             queue.add(parser); // add parser to queue
         }
-
-        // start the workers
-        Thread[] threads = new Thread[Math.max(Runtime.getRuntime().availableProcessors(), 1)];
-        for (int i = 0; i < threads.length; i++) {
-            threads[i] = new Thread(new Worker());
-            threads[i].start();
-        }
-
 
         // wait for all workers to finish
         for (int i = 0; i < threads.length; i++) {

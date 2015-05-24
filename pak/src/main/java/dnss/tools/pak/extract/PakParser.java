@@ -183,6 +183,7 @@ public class PakParser implements Runnable {
         return allowed && ! ignored;
     }
 
+    @Override
     public void run() {
         try {
             parse();
@@ -191,5 +192,10 @@ public class PakParser implements Runnable {
         } finally {
             done = true;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Parser-" + getPakName();
     }
 }

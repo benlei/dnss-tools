@@ -1,5 +1,6 @@
 package dnss.tools.dnt.sql;
 
+import dnss.tools.common.worker.Worker;
 import dnss.tools.dnt.DNT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import java.sql.DriverManager;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.prefs.Preferences;
 
 public class Main {
@@ -61,19 +63,23 @@ public class Main {
         // start queueing up the jobs
         Queue<Runnable> queue = DNT.getQueue();
 
-        // First add the uistring
+        // start the workers
+        AtomicBoolean stillAdding = new AtomicBoolean(true); // only since a Boolean doesn't have a setter
+        Worker.setQueue(queue);
+        Worker.setCondition((queueIsEmpty -> ! queueIsEmpty || stillAdding.get()));
+        Thread[] threads = new Thread[Worker.MAX_WORKERS];
+        for (int i = 0; i < threads.length; i++) {
+            threads[i] = new Worker();
+            threads[i].start();
+        }
+
+        // First add the uistrings
         queue.add(new XMLParser(conn, new File(root, "resource/uistring/uistring.xml")));
         for (File file : files) {
             queue.add(new DNTParser(conn, file));
         }
 
-
-        // start the workers
-        Thread[] threads = new Thread[Math.max(Runtime.getRuntime().availableProcessors(), 1)];
-        for (int i = 0; i < threads.length; i++) {
-            threads[i] = new Thread(new Worker());
-            threads[i].start();
-        }
+        stillAdding.set(false);
 
 
         // wait for all workers to finish

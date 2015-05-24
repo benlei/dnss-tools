@@ -5,6 +5,7 @@
         <module>pak</module>
         <module>dnt</module>
         <module>updater</module>
+        <module>tools-common</module>
     </modules>
     <artifactId>dnss-tools</artifactId>
     <groupId>dnss</groupId>
