@@ -1,17 +1,15 @@
-package dnss.tools.dnt.json;
+package dnss.tools.dnt.sql.json;
 
+import dnss.tools.common.worker.Worker;
 import dnss.tools.dnt.DNT;
+import dnss.tools.dnt.sql.json.mappings.SkillTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.*;
+import java.util.*;
 import java.util.prefs.Preferences;
 
 public class Main {
@@ -49,53 +47,46 @@ public class Main {
                 sql.get("pass", null));
         DNT.setLogQueries(sql.getBoolean("log_queries", DNT.isLogQueries()));
 
+        // fill the uistring
+        Map<Integer, String> uiString = DNT.getUiString();
+        Statement stmt = conn.createStatement();
+        try(ResultSet rs = stmt.executeQuery("SELECT * FROM uistring")) {
+            while (rs.next()) {
+                uiString.put(rs.getInt(1), rs.getString(2));
+            }
+            rs.close();
+        }
+
         // Get all skill tables
         List<String> skillTables = new ArrayList<>();
         DatabaseMetaData metaData = conn.getMetaData();
-        ResultSet rs = metaData.getTables(null, null, "skillleveltable\\_character%pve", null);
-        while (rs.next()) {
-            String table = rs.getString(3);
-            skillTables.add(table.substring(SKILL_TABLE_PREFIX.length(), table.length() - 3));
-        }
-
-        List<List<String>> condensedTables = condense(skillTables);
-
-        for (List<String> list : condensedTables) {
-            LOG.info(list.toString());
-        }
-
-    }
-
-    // probably unneeded as the only corner case is bringer, but meh just to be potentially safe
-    private static List<List<String>> condense(List<String> tables) {
-        List<List<String>> lists = new ArrayList<>();
-        for (String table : tables) {
-            List<String> initial = new ArrayList<>();
-            initial.add(table);
-            lists.add(initial);
-        }
-
-        for (String table : tables) {
-            for (int i = 0; i < lists.size(); i++) {
-                if (table == lists.get(i).get(0)) { // same string
-                    continue;
-                }
-
-                // eg if assassinbringer startswith assassin
-                if (lists.get(i).get(0).startsWith(table)) {
-                    String name = lists.get(i).get(0);
-                    lists.remove(i);
-                    for (List<String> list : lists) {
-                        if (list.get(0) == table) {
-                            list.add(name);
-                            break;
-                        }
-                    }
-                    --i;
-                }
+        try(ResultSet rs = metaData.getTables(null, null, "skillleveltable\\_character%pve", null)) {
+            while (rs.next()) {
+                String table = rs.getString(3);
+                table = table.substring(SKILL_TABLE_PREFIX.length(), table.length() - 3);
+                skillTables.add(table);
             }
+            rs.close();
         }
 
-        return lists;
+        Queue<Runnable> queue = DNT.getQueue();
+        Worker.setQueue(queue);
+
+        for (String job : skillTables) {
+            queue.add(new SkillsCollector(job, conn));
+        }
+
+        Worker.startWorkers();
+        Worker.awaitTermination();
+
+        Map<String, SkillTree> skillTrees = SkillsCollector.getAllSkillTrees();
+        for (Map.Entry<String, SkillTree> entry : skillTrees.entrySet()) {
+            LOG.info(entry.getKey() + ".json can be made!");
+        }
+
+        long endTime = System.currentTimeMillis();
+        LOG.info("===================================================================");
+        LOG.info("[system] workers = " + Worker.MAX_WORKERS);
+        LOG.info("[system] runtime = " + (endTime - startTime) + " ms");
     }
 }

@@ -4,9 +4,10 @@ import java.util.Queue;
 import java.util.function.Function;
 
 public class Worker extends Thread {
-    private static Function<Boolean, Boolean> condition;
+    private static Function<Boolean, Boolean> condition = (empty -> ! empty);
     private static Queue<Runnable> queue;
     public static final int MAX_WORKERS = Math.max(Runtime.getRuntime().availableProcessors(), 1);
+    private static Thread[] workers = new Thread[MAX_WORKERS];
 
     public static void setCondition(Function<Boolean, Boolean> condition) {
         Worker.condition = condition;
@@ -14,6 +15,22 @@ public class Worker extends Thread {
 
     public static void setQueue(Queue<Runnable> queue) {
         Worker.queue = queue;
+    }
+
+    public static void startWorkers() {
+        for (int i = 0; i < workers.length; i++) {
+            workers[i] = new Worker();
+            workers[i].start();
+        }
+    }
+
+    public static void awaitTermination() {
+        for (int i = 0; i < workers.length; i++) {
+            try {
+                workers[i].join();
+            } catch (InterruptedException ignorable) {
+            }
+        }
     }
 
     @Override

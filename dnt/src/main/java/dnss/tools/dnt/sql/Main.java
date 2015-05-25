@@ -55,8 +55,7 @@ public class Main {
         conn.setAutoCommit(false);
 
 
-        Preferences pak = ini.node("pak");
-        File root = new File(pak.get("root", null));
+        File root = new File(ini.node("resource").get("location", null));
         File ext = new File(root, "resource/ext");
         List<File> files = Arrays.asList(ext.listFiles((dir, name) -> name.endsWith(".dnt")));
 
@@ -66,33 +65,24 @@ public class Main {
         // start the workers
         AtomicBoolean stillAdding = new AtomicBoolean(true); // only since a Boolean doesn't have a setter
         Worker.setQueue(queue);
-        Worker.setCondition((queueIsEmpty -> ! queueIsEmpty || stillAdding.get()));
-        Thread[] threads = new Thread[Worker.MAX_WORKERS];
-        for (int i = 0; i < threads.length; i++) {
-            threads[i] = new Worker();
-            threads[i].start();
-        }
 
         // First add the uistrings
         queue.add(new XMLParser(conn, new File(root, "resource/uistring/uistring.xml")));
         for (File file : files) {
             queue.add(new DNTParser(conn, file));
         }
-
-        stillAdding.set(false);
+        Worker.startWorkers();
 
 
         // wait for all workers to finish
-        for (int i = 0; i < threads.length; i++) {
-            threads[i].join();
-        }
+        Worker.awaitTermination();
 
         conn.commit();
         conn.close();
 
         long endTime = System.currentTimeMillis();
         LOG.info("===================================================================");
-        LOG.info("[system] workers = " + threads.length);
+        LOG.info("[system] workers = " + Worker.MAX_WORKERS);
         LOG.info("[system] runtime = " + (endTime - startTime) + " ms");
     }
 }

@@ -34,8 +34,8 @@ public class XMLParser extends AbstractParser {
         }
 
         Map<String, Types> fields = new LinkedHashMap<>();
-        fields.put("_Mid", Types.INTEGER);
-        fields.put("_CData", Types.STRING);
+        fields.put("_ID", Types.INTEGER);
+        fields.put("_Message", Types.STRING);
         recreateTable(fields);
 
 

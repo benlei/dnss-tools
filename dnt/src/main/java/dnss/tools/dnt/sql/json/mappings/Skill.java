@@ -1,4 +1,4 @@
-package dnss.tools.dnt.json.mappings;
+package dnss.tools.dnt.sql.json.mappings;
 
 import java.util.List;
 import java.util.Map;
@@ -10,6 +10,10 @@ public class Skill {
     private int type;
     private List<Integer> weapons;
     private Map<Integer, Integer> sp;
+
+    public Skill(int id) {
+        this.id = id;
+    }
 
     public int getId() {
         return id;

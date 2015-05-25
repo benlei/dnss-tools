@@ -66,11 +66,11 @@
 							<id>dnt-sql</id>
 						</program>
 						<program>
-							<mainClass>dnss.tools.dnt.json.Main</mainClass>
+							<mainClass>dnss.tools.dnt.sql.json.Main</mainClass>
 							<id>sql-json</id>
 						</program>
 						<program>
-							<mainClass>dnss.tools.dnt.xml.Main</mainClass>
+							<mainClass>dnss.tools.dnt.sql.xml.Main</mainClass>
 							<id>sql-xml</id>
 						</program>
 					</programs>

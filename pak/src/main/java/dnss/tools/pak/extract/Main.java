@@ -129,12 +129,7 @@ public class Main {
         // 3) parsing is not done
         Worker.setQueue(queue);
         Worker.setCondition(condition -> files.size() != parsers.size() || ! condition || ! Pak.isParsingDone());
-
-        Thread[] threads = new Thread[Worker.MAX_WORKERS];
-        for (int i = 0; i < threads.length; i++) {
-            threads[i] = new Worker();
-            threads[i].start();
-        }
+        Worker.startWorkers();
 
         for (File file : files) {
             PakParser parser = new PakParser(file);
@@ -143,9 +138,7 @@ public class Main {
         }
 
         // wait for all workers to finish
-        for (int i = 0; i < threads.length; i++) {
-            threads[i].join();
-        }
+        Worker.awaitTermination();
 
         long endTime = System.currentTimeMillis();
 
@@ -163,7 +156,7 @@ public class Main {
         }
 
         LOG.info("===================================================================");
-        LOG.info("[system] workers = " + threads.length);
+        LOG.info("[system] workers = " + Worker.MAX_WORKERS);
         LOG.info("[system] runtime = " + (endTime - startTime) + " ms");
     }
 }

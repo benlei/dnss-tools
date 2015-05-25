@@ -34,7 +34,7 @@ public class DNTParser extends AbstractParser {
         int numRows = buf.getInt();
 
         Map<String, Types> fields = new LinkedHashMap<>();
-        fields.put("_Id", Types.INTEGER);
+        fields.put("_ID", Types.INTEGER);
         for (int i = 0; i < numCols; i++) {
             byte[] fieldNameBytes = new byte[buf.getShort()];
             buf.get(fieldNameBytes);

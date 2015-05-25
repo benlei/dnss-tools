@@ -1,4 +1,4 @@
-package dnss.tools.dnt.json.mappings;
+package dnss.tools.dnt.sql.json.mappings;
 
 public class Level {
     private int requiredLevel;

@@ -1,4 +1,4 @@
-package dnss.tools.dnt.xml;
+package dnss.tools.dnt.sql.xml;
 
 /**
  * Created by Ben on 5/24/2015.
