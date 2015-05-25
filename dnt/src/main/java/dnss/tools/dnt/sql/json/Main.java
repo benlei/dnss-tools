@@ -2,6 +2,9 @@ package dnss.tools.dnt.sql.json;
 
 import dnss.tools.common.worker.Worker;
 import dnss.tools.dnt.DNT;
+import dnss.tools.dnt.sql.json.collectors.BaseCollector;
+import dnss.tools.dnt.sql.json.collectors.SplitCollector;
+import dnss.tools.dnt.sql.json.collectors.UnifiedCollector;
 import dnss.tools.dnt.sql.json.mappings.SkillTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,28 +61,33 @@ public class Main {
         }
 
         // Get all skill tables
-        List<String> skillTables = new ArrayList<>();
+        Set<String> skillLevelTables = new HashSet<>();
         DatabaseMetaData metaData = conn.getMetaData();
-        try(ResultSet rs = metaData.getTables(null, null, "skillleveltable\\_character%pve", null)) {
-            while (rs.next()) {
-                String table = rs.getString(3);
-                table = table.substring(SKILL_TABLE_PREFIX.length(), table.length() - 3);
-                skillTables.add(table);
-            }
-            rs.close();
-        }
-
         Queue<Runnable> queue = DNT.getQueue();
         Worker.setQueue(queue);
+        try(ResultSet rs = metaData.getTables(null, null, "skillleveltable\\_character%", null)) {
+            while (rs.next()) {
+                String table = rs.getString(3);
+                if (table.endsWith("characteretc")) {
+                    continue; // ignore for now
+                } else if (table.endsWith("pvp") || table.endsWith("pve")) {
+                    table = table.substring(SKILL_TABLE_PREFIX.length(), table.length() - 3);
+                    skillLevelTables.add(table);
+                    queue.add(new SplitCollector(table, conn));
+                } else { // atm DA has not been added to the roster
+//                    table = table.substring(SKILL_TABLE_PREFIX.length());
+//                    skillLevelTables.add(table);
+//                    queue.add(new UnifiedCollector(table, conn));
+                }
 
-        for (String job : skillTables) {
-            queue.add(new SkillsCollector(job, conn));
+            }
+            rs.close();
         }
 
         Worker.startWorkers();
         Worker.awaitTermination();
 
-        Map<String, SkillTree> skillTrees = SkillsCollector.getAllSkillTrees();
+        Map<String, SkillTree> skillTrees = BaseCollector.getSkillTrees();
         for (Map.Entry<String, SkillTree> entry : skillTrees.entrySet()) {
             LOG.info(entry.getKey() + ".json can be made!");
         }

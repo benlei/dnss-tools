@@ -1,4 +1,4 @@
-package dnss.tools.dnt.sql.json;
+package dnss.tools.dnt.sql.json.collectors;
 
 import dnss.tools.dnt.DNT;
 import dnss.tools.dnt.sql.json.mappings.Skill;
@@ -11,26 +11,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-// This class should just collect all releveant skill trees, then create it into a json
-public class SkillsCollector implements Runnable {
-    private final static Logger LOG = LoggerFactory.getLogger(SkillsCollector.class);
+// This is for when there's a split of tables (e.g. warriorpve and warriorpvp)
+public class SplitCollector extends BaseCollector {
+    private final static Logger LOG = LoggerFactory.getLogger(SplitCollector.class);
 
-    private String table;
-    private Connection conn;
-    private static final Map<String, SkillTree> skillTrees = new ConcurrentHashMap<>();
-
-    public SkillsCollector(String table, Connection conn) {
-        this.table = table;
-        this.conn = conn;
+    public SplitCollector(String table, Connection conn) {
+        super(table, conn);
     }
 
-    public void collect() throws SQLException {
+    @Override
+    public void collectPve() throws SQLException {
         Map<Integer, String> uiStrings = DNT.getUiString();
-        Statement stmt = conn.createStatement();
+        Statement stmt = getConn().createStatement();
+        Map<String, SkillTree> skillTrees = getSkillTrees();
 
         // Generate the basic skill table
         String query = "SELECT _SkillTableID, _NeedJob, LOWER(_EnglishName), _JobNumber  " +
@@ -39,7 +34,7 @@ public class SkillsCollector implements Runnable {
                 "       ON(_SkillTableID = s._ID) " +
                 "   INNER JOIN jobtable j " +
                 "       ON(s._NeedJob = j._ID) " +
-                "   INNER JOIN skillleveltable_character" + table + "pve c " +
+                "   INNER JOIN skillleveltable_character" + getTable() + "pve c " +
                 "       ON(_SkillTableID = c._SkillIndex)";
 
 
@@ -77,26 +72,10 @@ public class SkillsCollector implements Runnable {
                 // fill up level of each skill
             }
         }
-
-        // fill up pvp mode of each skill
-
-    }
-
-    public static Map<String, SkillTree> getAllSkillTrees() {
-        return skillTrees;
     }
 
     @Override
-    public void run() {
-        try {
-            collect();
-        } catch (SQLException e) {
-            LOG.warn(e.getMessage(), e);
-        }
-    }
+    public void collectPvp() throws SQLException {
 
-    @Override
-    public String toString() {
-        return "Collector-" + table;
     }
 }
