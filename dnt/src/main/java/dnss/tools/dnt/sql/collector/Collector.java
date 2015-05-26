@@ -1,8 +1,8 @@
-package dnss.tools.dnt.sql.json;
+package dnss.tools.dnt.sql.collector;
 
-import dnss.tools.dnt.sql.json.mappings.Level;
-import dnss.tools.dnt.sql.json.mappings.Skill;
-import dnss.tools.dnt.sql.json.mappings.SkillTree;
+import dnss.tools.dnt.sql.collector.mappings.Level;
+import dnss.tools.dnt.sql.collector.mappings.Skill;
+import dnss.tools.dnt.sql.collector.mappings.SkillTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static dnss.tools.dnt.sql.json.mappings.Level.Mode;
+import static dnss.tools.dnt.sql.collector.mappings.Level.Mode;
 
 public class Collector implements Runnable {
     private final static Logger LOG = LoggerFactory.getLogger(Collector.class);
