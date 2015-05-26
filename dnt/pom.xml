@@ -67,7 +67,7 @@
 						</program>
 						<program>
 							<mainClass>dnss.tools.dnt.sql.collector.Main</mainClass>
-							<id>dnt-collector</id>
+							<id>sql-collector</id>
 						</program>
 					</programs>
 				</configuration>

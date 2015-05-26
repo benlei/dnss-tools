@@ -19,12 +19,12 @@ public class Main {
     private final static String DEFAULT_INI = "dnt.ini";
 
     private static void showManual() {
-        System.out.println("Usage: dnt-collector [INI_FILE]");
-        System.out.println("'dnt-collector' Uses SQL table information to gather the skill JSON files");
+        System.out.println("Usage: sql-collector [INI_FILE]");
+        System.out.println("'sql-collector' Uses SQL table information to gather the skill JSON files");
         System.out.println();
         System.out.println("Examples:");
-        System.out.println("  dnt-collector\t\t# Uses the default dnt.ini to generate JSON files");
-        System.out.println("  dnt-collector \"C:\\dnt.ini\" \t\t# Uses the C:\\dnt.ini file settings for JSON generation");
+        System.out.println("  sql-collector\t\t# Uses the default dnt.ini to generate JSON files");
+        System.out.println("  sql-collector \"C:\\dnt.ini\" \t\t# Uses the C:\\dnt.ini file settings for JSON generation");
     }
     public static void main(String[] args) throws Exception {
         long startTime = System.currentTimeMillis();
