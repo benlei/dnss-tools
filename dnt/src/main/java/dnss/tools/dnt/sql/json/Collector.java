@@ -97,7 +97,7 @@ public class Collector implements Runnable {
                         skillTree = skillTrees.get(jobSlug);
                     } else {
                         skillTree = new SkillTree();
-                        skillTree.setJobID(jobID);
+                        skillTree.setJob(jobID);
                         skillTree.setAdvancement(advancement);
 
                         Map<Integer, String> uiString = new ConcurrentHashMap<>();
@@ -106,7 +106,7 @@ public class Collector implements Runnable {
                         Map<Integer, Skill> skills = new HashMap<>();
                         skillTree.setSkills(skills);
 
-                        skillTree.setJobSlug(jobSlug);
+                        skillTree.setSlug(jobSlug);
                         skillTrees.put(jobSlug, skillTree);
                     }
                 }
