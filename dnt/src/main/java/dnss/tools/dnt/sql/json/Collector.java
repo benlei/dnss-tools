@@ -35,11 +35,11 @@ public class Collector implements Runnable {
     static {
         String str = null;
         try {
-            URL resource = Collector.class.getClassLoader().getResource("sql/template.sql");
+            URL resource = Collector.class.getClassLoader().getResource("sql/collector.sql");
             if (resource != null) {
                 str = new String(Files.readAllBytes(Paths.get(resource.toURI())));
             } else {
-                LOG.error("resource/sql/template.sql could not be loaded.");
+                LOG.error("resource/sql/collector.sql could not be loaded.");
             }
         } catch (Exception e) {
             LOG.error("Template Loader Error: " + e.getMessage(), e);
