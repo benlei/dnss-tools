@@ -59,7 +59,7 @@ public abstract class AbstractParser implements Runnable {
                     query += ",";
                 }
             }
-            query += ") CHARACTER SET=utf8";
+            query += ")";
 
             if (DNT.isLogQueries()) {
                 LOG.info(query);
