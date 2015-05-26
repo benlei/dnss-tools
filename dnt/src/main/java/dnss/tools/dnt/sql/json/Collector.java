@@ -71,7 +71,7 @@ public class Collector implements Runnable {
                 int id = rs.getInt("_SkillTableID");
                 int lvl = rs.getInt("_SkillLevel");
                 int jobID = rs.getInt("_NeedJob");
-                String jobName = rs.getString("_EnglishName").toLowerCase();
+                String jobSlug = rs.getString("_EnglishName").toLowerCase();
                 int advancement = rs.getInt("_JobNumber");
                 int nameID = rs.getInt("_NameID");
                 int type = rs.getInt("_SkillType");
@@ -93,8 +93,8 @@ public class Collector implements Runnable {
 
                 SkillTree skillTree;
                 synchronized (skillTrees) { // skill tree lock for when pvp/pve creates skill tree
-                    if (skillTrees.containsKey(jobName)) {
-                        skillTree = skillTrees.get(jobName);
+                    if (skillTrees.containsKey(jobSlug)) {
+                        skillTree = skillTrees.get(jobSlug);
                     } else {
                         skillTree = new SkillTree();
                         skillTree.setJobID(jobID);
@@ -106,8 +106,8 @@ public class Collector implements Runnable {
                         Map<Integer, Skill> skills = new HashMap<>();
                         skillTree.setSkills(skills);
 
-                        skillTree.setJobName(jobName);
-                        skillTrees.put(jobName, skillTree);
+                        skillTree.setJobSlug(jobSlug);
+                        skillTrees.put(jobSlug, skillTree);
                     }
                 }
 

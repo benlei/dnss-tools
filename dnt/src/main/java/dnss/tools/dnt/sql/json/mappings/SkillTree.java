@@ -4,7 +4,7 @@ import java.util.Map;
 
 public class SkillTree {
     private int jobID;
-    private String jobName;
+    private String jobSlug;
     private int advancement;
     private Map<Integer, Skill> skills;
     private Map<Integer, String> uiString;
@@ -17,12 +17,12 @@ public class SkillTree {
         this.jobID = jobID;
     }
 
-    public String getJobName() {
-        return jobName;
+    public String getJobSlug() {
+        return jobSlug;
     }
 
-    public void setJobName(String jobName) {
-        this.jobName = jobName;
+    public void setJobSlug(String jobSlug) {
+        this.jobSlug = jobSlug;
     }
 
     public int getAdvancement() {
