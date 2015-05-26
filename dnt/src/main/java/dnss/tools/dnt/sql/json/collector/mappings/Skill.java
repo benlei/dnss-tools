@@ -1,4 +1,4 @@
-package dnss.tools.dnt.sql.collector.mappings;
+package dnss.tools.dnt.sql.json.collector.mappings;
 
 import java.util.Map;
 
