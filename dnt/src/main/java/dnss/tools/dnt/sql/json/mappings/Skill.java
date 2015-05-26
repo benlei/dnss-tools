@@ -1,19 +1,21 @@
 package dnss.tools.dnt.sql.json.mappings;
 
-import java.util.List;
 import java.util.Map;
 
 public class Skill {
     private int id;
-    private int name;
-    private List<Level> levels;
+    private int nameID;
+    private Map<Integer, Level> levels;
     private int type;
-    private List<Integer> weapons;
-    private Map<Integer, Integer> sp;
-
-    public Skill(int id) {
-        this.id = id;
-    }
+    private int weapon1;
+    private int weapon2;
+    private int parentID1;
+    private int parentLevel1;
+    private int parentID2;
+    private int parentLevel2;
+    private int basicSP;
+    private int firstSP;
+    private int slot;
 
     public int getId() {
         return id;
@@ -23,19 +25,19 @@ public class Skill {
         this.id = id;
     }
 
-    public int getName() {
-        return name;
+    public int getNameID() {
+        return nameID;
     }
 
-    public void setName(int name) {
-        this.name = name;
+    public void setNameID(int nameID) {
+        this.nameID = nameID;
     }
 
-    public List<Level> getLevels() {
+    public Map<Integer, Level> getLevels() {
         return levels;
     }
 
-    public void setLevels(List<Level> levels) {
+    public void setLevels(Map<Integer, Level> levels) {
         this.levels = levels;
     }
 
@@ -47,19 +49,75 @@ public class Skill {
         this.type = type;
     }
 
-    public List<Integer> getWeapons() {
-        return weapons;
+    public int getWeapon1() {
+        return weapon1;
     }
 
-    public void setWeapons(List<Integer> weapons) {
-        this.weapons = weapons;
+    public void setWeapon1(int weapon1) {
+        this.weapon1 = weapon1;
     }
 
-    public Map<Integer, Integer> getSp() {
-        return sp;
+    public int getWeapon2() {
+        return weapon2;
     }
 
-    public void setSp(Map<Integer, Integer> sp) {
-        this.sp = sp;
+    public void setWeapon2(int weapon2) {
+        this.weapon2 = weapon2;
+    }
+
+    public int getParentID1() {
+        return parentID1;
+    }
+
+    public void setParentID1(int parentID1) {
+        this.parentID1 = parentID1;
+    }
+
+    public int getParentLevel1() {
+        return parentLevel1;
+    }
+
+    public void setParentLevel1(int parentLevel1) {
+        this.parentLevel1 = parentLevel1;
+    }
+
+    public int getParentID2() {
+        return parentID2;
+    }
+
+    public void setParentID2(int parentID2) {
+        this.parentID2 = parentID2;
+    }
+
+    public int getParentLevel2() {
+        return parentLevel2;
+    }
+
+    public void setParentLevel2(int parentLevel2) {
+        this.parentLevel2 = parentLevel2;
+    }
+
+    public int getBasicSP() {
+        return basicSP;
+    }
+
+    public void setBasicSP(int basicSP) {
+        this.basicSP = basicSP;
+    }
+
+    public int getFirstSP() {
+        return firstSP;
+    }
+
+    public void setFirstSP(int firstSP) {
+        this.firstSP = firstSP;
+    }
+
+    public int getSlot() {
+        return slot;
+    }
+
+    public void setSlot(int slot) {
+        this.slot = slot;
     }
 }

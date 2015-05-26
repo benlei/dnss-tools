@@ -82,7 +82,7 @@ public class DNTParser extends AbstractParser {
     }
 
     @Override
-    public String getThreadName() {
-        return "DNT";
+    public String toString() {
+        return "DNT-" + getName();
     }
 }

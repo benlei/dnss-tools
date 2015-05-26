@@ -1,17 +1,15 @@
 package dnss.tools.dnt.sql;
 
+import dnss.tools.dnt.DNT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.CharacterData;
+import org.w3c.dom.*;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -23,10 +21,9 @@ public class XMLParser extends AbstractParser {
     }
 
     public void parse() throws Exception {
-        File file = getFile();
         Document document;
         try {
-            document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file);
+            document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(getFile());
             document.getDocumentElement().normalize();
         } catch (Exception e) {
             LOG.error("Could not open XML document", e);
@@ -38,20 +35,26 @@ public class XMLParser extends AbstractParser {
         fields.put("_Message", Types.STRING);
         recreateTable(fields);
 
-
+        int total = 0;
+        int fails = 0;
         NodeList nodeList = document.getElementsByTagName("message");
         for (int i = 0; i < nodeList.getLength(); i++) {
-            ArrayList<Object> values = new ArrayList<>();
             Element element = (Element) nodeList.item(i);
-            CharacterData characterData = (CharacterData)element.getFirstChild();
-            byte[] cdata = characterData.getData().getBytes();
-            values.add(Integer.valueOf(element.getAttribute("mid"))); // first col: message id
-            values.add(new String(cdata)); // second col: cdata
+            CharacterData characterData = (CharacterData) element.getFirstChild();
             try {
-                insert(values);
+                ++total;
+                insert(Arrays.asList(new Object[]{Integer.valueOf(element.getAttribute("mid")),
+                        characterData.getData().getBytes("UTF-8")}));
             } catch (SQLException e) {
-                LOG.warn(e.getMessage(), e);
+                ++fails;
+                if (DNT.isLogQueries()) {
+                    LOG.warn(e.getMessage(), e);
+                }
             }
+        }
+
+        if (fails != 0) {
+            LOG.info(fails + " out of " + total + " entries failed to be inserted to " + getName());
         }
     }
 
@@ -63,7 +66,7 @@ public class XMLParser extends AbstractParser {
     }
 
     @Override
-    public String getThreadName() {
-        return "XML";
+    public String toString() {
+        return "XML-" + getName();
     }
 }

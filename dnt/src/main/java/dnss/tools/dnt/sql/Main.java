@@ -63,18 +63,19 @@ public class Main {
         Queue<Runnable> queue = DNT.getQueue();
 
         // start the workers
-        AtomicBoolean stillAdding = new AtomicBoolean(true); // only since a Boolean doesn't have a setter
         Worker.setQueue(queue);
 
         // First add the uistrings
-        queue.add(new XMLParser(conn, new File(root, "resource/uistring/uistring.xml")));
+        File uiString = new File(root, "resource/uistring/uistring.xml");
+        if (uiString.exists()) {
+            queue.add(new XMLParser(conn, uiString));
+        }
+
         for (File file : files) {
             queue.add(new DNTParser(conn, file));
         }
+
         Worker.startWorkers();
-
-
-        // wait for all workers to finish
         Worker.awaitTermination();
 
         conn.commit();

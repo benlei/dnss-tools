@@ -89,19 +89,25 @@ public abstract class AbstractParser implements Runnable {
             Iterator<Types> iterator = fields.values().iterator();
             for (int i = 0, j = 1; iterator.hasNext(); i++, j++) {
                 Types type = iterator.next();
+                Object obj = list.get(i);
                 switch (type) {
                     case STRING:
-                        String str = (String) list.get(i);
-                        stmt.setString(j, str.length() == 0 ? null : str);
+                        if (obj instanceof String) {
+                            String str = (String)obj;
+                            stmt.setString(j, str.length() == 0 ? null : str);
+                        } else {
+                            byte[] bytes = (byte[])obj;
+                            stmt.setBytes(j, bytes);
+                        }
                         break;
                     case INTEGER:
-                        stmt.setInt(j, (Integer) list.get(i));
+                        stmt.setInt(j, (Integer)obj);
                         break;
                     case BOOLEAN:
-                        stmt.setBoolean(j, (Boolean) list.get(i));
+                        stmt.setBoolean(j, (Boolean)obj);
                         break;
                     case FLOAT:
-                        stmt.setFloat(j, (Float) list.get(i));
+                        stmt.setFloat(j, (Float)obj);
                         break;
                 }
             }
@@ -112,17 +118,15 @@ public abstract class AbstractParser implements Runnable {
 
             stmt.executeUpdate();
         } catch (SQLException e) {
-            LOG.warn("The following query failed: " + stmt.toString());
+            LOG.warn(stmt.toString());
             throw e;
         } finally {
             stmt.close();
         }
     }
 
-    public abstract String getThreadName();
-
     public String getName() {
-        return file.getName(); // remove .dnt/xml at end
+        return file.getName();
     }
 
     abstract void parse() throws Exception;

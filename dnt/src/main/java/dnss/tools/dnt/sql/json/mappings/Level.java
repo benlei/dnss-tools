@@ -1,16 +1,27 @@
 package dnss.tools.dnt.sql.json.mappings;
 
+import dnss.tools.dnt.sql.json.Apply;
+
 public class Level {
-    private int requiredLevel;
+    private int sp;
+    private int limit;
     private Mode pvp;
     private Mode pve;
 
-    public int getRequiredLevel() {
-        return requiredLevel;
+    public int getSp() {
+        return sp;
     }
 
-    public void setRequiredLevel(int requiredLevel) {
-        this.requiredLevel = requiredLevel;
+    public void setSp(int sp) {
+        this.sp = sp;
+    }
+
+    public int getLimit() {
+        return limit;
+    }
+
+    public void setLimit(int limit) {
+        this.limit = limit;
     }
 
     public Mode getPvp() {
@@ -29,18 +40,35 @@ public class Level {
         this.pve = pve;
     }
 
-    public static class Mode {
-        private int explanationId;
-        private String explanationParams;
-        private float mp;
-        private float cd;
-
-        public int getExplanationId() {
-            return explanationId;
+    public Mode createOrGetMode(Apply type) {
+        switch (type) {
+            case PvE:
+                if (pve == null) {
+                    pve = new Mode();
+                }
+                return pve;
+            case PvP:
+                if (pvp == null) {
+                    pvp = new Mode();
+                }
+                return pvp;
         }
 
-        public void setExplanationId(int explanationId) {
-            this.explanationId = explanationId;
+        throw new RuntimeException("Invalid mode");
+    }
+
+    public static class Mode {
+        private int explanationID;
+        private String explanationParams;
+        private double mp;
+        private double cd;
+
+        public int getExplanationID() {
+            return explanationID;
+        }
+
+        public void setExplanationID(int explanationID) {
+            this.explanationID = explanationID;
         }
 
         public String getExplanationParams() {
@@ -51,19 +79,19 @@ public class Level {
             this.explanationParams = explanationParams;
         }
 
-        public float getMp() {
+        public double getMp() {
             return mp;
         }
 
-        public void setMp(float mp) {
+        public void setMp(double mp) {
             this.mp = mp;
         }
 
-        public float getCd() {
+        public double getCd() {
             return cd;
         }
 
-        public void setCd(float cd) {
+        public void setCd(double cd) {
             this.cd = cd;
         }
     }

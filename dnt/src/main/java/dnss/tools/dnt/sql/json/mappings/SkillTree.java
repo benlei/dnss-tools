@@ -1,21 +1,20 @@
 package dnss.tools.dnt.sql.json.mappings;
 
-import java.util.List;
 import java.util.Map;
 
 public class SkillTree {
-    private int jobId;
+    private int jobID;
     private String jobName;
     private int advancement;
     private Map<Integer, Skill> skills;
     private Map<Integer, String> uiString;
 
-    public int getJobId() {
-        return jobId;
+    public int getJobID() {
+        return jobID;
     }
 
-    public void setJobId(int jobId) {
-        this.jobId = jobId;
+    public void setJobID(int jobID) {
+        this.jobID = jobID;
     }
 
     public String getJobName() {
