@@ -1,9 +1,9 @@
-package dnss.tools.dnt.sql.json.collector;
+package dnss.tools.dnt.sql.collector.json.frontend;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dnss.tools.common.worker.Worker;
 import dnss.tools.dnt.DNT;
-import dnss.tools.dnt.sql.json.collector.mappings.SkillTree;
+import dnss.tools.dnt.sql.collector.json.frontend.mappings.SkillTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,12 +19,12 @@ public class Main {
     private final static String DEFAULT_INI = "dnt.ini";
 
     private static void showManual() {
-        System.out.println("Usage: dnt-sql-jsoncollector [INI_FILE]");
-        System.out.println("'dnt-sql-jsoncollector' Uses SQL table information to gather the skill JSON files");
+        System.out.println("Usage: dnt-frontend [INI_FILE]");
+        System.out.println("'dnt-frontend' Uses SQL table information to gather the skill JSON files");
         System.out.println();
         System.out.println("Examples:");
-        System.out.println("  dnt-sql-jsoncollector\t\t# Uses the default dnt.ini to generate JSON files");
-        System.out.println("  dnt-sql-jsoncollector \"C:\\dnt.ini\" \t\t# Uses the C:\\dnt.ini file settings for JSON generation");
+        System.out.println("  dnt-frontend\t\t# Uses the default dnt.ini to generate JSON files");
+        System.out.println("  dnt-frontend \"C:\\dnt.ini\" \t\t# Uses the C:\\dnt.ini file settings for JSON generation");
     }
     public static void main(String[] args) throws Exception {
         long startTime = System.currentTimeMillis();

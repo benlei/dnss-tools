@@ -66,8 +66,12 @@
 							<id>dnt-sql</id>
 						</program>
 						<program>
-							<mainClass>dnss.tools.dnt.sql.json.collector.Main</mainClass>
-							<id>dnt-sql-jsoncollector</id>
+							<mainClass>dnss.tools.dnt.sql.collector.json.frontend.Main</mainClass>
+							<id>dnt-frontend</id>
+						</program>
+						<program>
+							<mainClass>dnss.tools.dnt.sql.collector.json.backend.Main</mainClass>
+							<id>dnt-backend</id>
 						</program>
 					</programs>
 				</configuration>

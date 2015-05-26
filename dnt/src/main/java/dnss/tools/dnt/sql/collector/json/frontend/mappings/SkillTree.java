@@ -1,29 +1,11 @@
-package dnss.tools.dnt.sql.json.collector.mappings;
+package dnss.tools.dnt.sql.collector.json.frontend.mappings;
 
 import java.util.Map;
 
 public class SkillTree {
-    private int job;
-    private String slug;
     private int advancement;
     private Map<Integer, Skill> skills;
     private Map<Integer, String> uiString;
-
-    public int getJob() {
-        return job;
-    }
-
-    public void setJob(int job) {
-        this.job = job;
-    }
-
-    public String getSlug() {
-        return slug;
-    }
-
-    public void setSlug(String slug) {
-        this.slug = slug;
-    }
 
     public int getAdvancement() {
         return advancement;

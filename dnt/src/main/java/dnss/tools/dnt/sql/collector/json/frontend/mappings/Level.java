@@ -1,6 +1,6 @@
-package dnss.tools.dnt.sql.json.collector.mappings;
+package dnss.tools.dnt.sql.collector.json.frontend.mappings;
 
-import dnss.tools.dnt.sql.json.collector.Apply;
+import dnss.tools.dnt.sql.collector.json.frontend.Apply;
 
 public class Level {
     private int sp;

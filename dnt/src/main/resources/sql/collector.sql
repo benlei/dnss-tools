@@ -1,7 +1,8 @@
 SELECT _SkillTableID,            -- Skill.id
        _SkillLevel,              -- Skill.level
        _NeedJob,                 -- SkillTree.jobID
-       _EnglishName,             -- SkillTree.jobName
+       _EnglishName,             -- -- Just used for file name
+       _IconImageIndex,          -- Skill.icon
        _JobNumber,               -- SkillTree.advancement
        _NameID,                  -- Skill.nameID
        _SkillType,               -- Skill.type

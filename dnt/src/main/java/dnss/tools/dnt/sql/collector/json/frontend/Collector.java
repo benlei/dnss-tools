@@ -1,8 +1,8 @@
-package dnss.tools.dnt.sql.json.collector;
+package dnss.tools.dnt.sql.collector.json.frontend;
 
-import dnss.tools.dnt.sql.json.collector.mappings.Level;
-import dnss.tools.dnt.sql.json.collector.mappings.Skill;
-import dnss.tools.dnt.sql.json.collector.mappings.SkillTree;
+import dnss.tools.dnt.sql.collector.json.frontend.mappings.Level;
+import dnss.tools.dnt.sql.collector.json.frontend.mappings.Skill;
+import dnss.tools.dnt.sql.collector.json.frontend.mappings.SkillTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static dnss.tools.dnt.sql.json.collector.mappings.Level.Mode;
+import static dnss.tools.dnt.sql.collector.json.frontend.mappings.Level.Mode;
 
 public class Collector implements Runnable {
     private final static Logger LOG = LoggerFactory.getLogger(Collector.class);
@@ -70,9 +70,9 @@ public class Collector implements Runnable {
             while (rs.next()) {
                 int id = rs.getInt("_SkillTableID");
                 int lvl = rs.getInt("_SkillLevel");
-                int jobID = rs.getInt("_NeedJob");
-                String jobSlug = rs.getString("_EnglishName").toLowerCase();
+                String slug = rs.getString("_EnglishName").toLowerCase();
                 int advancement = rs.getInt("_JobNumber");
+                int icon = rs.getInt("_IconImageIndex");
                 int nameID = rs.getInt("_NameID");
                 int type = rs.getInt("_SkillType");
                 int weapon1 = rs.getInt("_NeedWeaponType1");
@@ -93,11 +93,10 @@ public class Collector implements Runnable {
 
                 SkillTree skillTree;
                 synchronized (skillTrees) { // skill tree lock for when pvp/pve creates skill tree
-                    if (skillTrees.containsKey(jobSlug)) {
-                        skillTree = skillTrees.get(jobSlug);
+                    if (skillTrees.containsKey(slug)) {
+                        skillTree = skillTrees.get(slug);
                     } else {
                         skillTree = new SkillTree();
-                        skillTree.setJob(jobID);
                         skillTree.setAdvancement(advancement);
 
                         Map<Integer, String> uiString = new ConcurrentHashMap<>();
@@ -106,8 +105,7 @@ public class Collector implements Runnable {
                         Map<Integer, Skill> skills = new HashMap<>();
                         skillTree.setSkills(skills);
 
-                        skillTree.setSlug(jobSlug);
-                        skillTrees.put(jobSlug, skillTree);
+                        skillTrees.put(slug, skillTree);
                     }
                 }
 
@@ -133,6 +131,7 @@ public class Collector implements Runnable {
                         skill.setBasicSP(basicSP);
                         skill.setFirstSP(firstSP);
                         skill.setSlot(slot);
+                        skill.setIcon(icon);
 
                         skills.put(id, skill);
                     }

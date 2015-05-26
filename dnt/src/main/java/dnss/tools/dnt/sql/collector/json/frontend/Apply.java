@@ -1,4 +1,4 @@
-package dnss.tools.dnt.sql.json.collector;
+package dnss.tools.dnt.sql.collector.json.frontend;
 
 public enum Apply {
     PvE (0),
