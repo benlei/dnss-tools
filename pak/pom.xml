@@ -10,7 +10,6 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>dnss-pak</artifactId>
 
-
 	<dependencies>
 		<dependency>
 			<groupId>dnss</groupId>
@@ -36,7 +35,7 @@
 				<configuration>
 					<programs>
 						<program>
-							<mainClass>dnss.tools.pak</mainClass>
+							<mainClass>dnss.tools.pak.Main</mainClass>
 							<id>pak</id>
 						</program>
 					</programs>

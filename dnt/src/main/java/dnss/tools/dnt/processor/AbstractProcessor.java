@@ -1,8 +1,6 @@
-package dnss.tools.dnt.sql;
+package dnss.tools.dnt.processor;
 
 import dnss.tools.dnt.DNT;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.sql.Connection;
@@ -13,14 +11,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public abstract class AbstractParser implements Runnable {
-    private final static Logger LOG = LoggerFactory.getLogger(AbstractParser.class);
-
+public abstract class AbstractProcessor implements Runnable {
     private final Connection conn;
     private final File file;
     private Map<String, Types> fields;
 
-    public AbstractParser(Connection conn, File file) {
+    public AbstractProcessor(Connection conn, File file) {
         this.conn = conn;
         this.file = file;
     }
@@ -30,14 +26,13 @@ public abstract class AbstractParser implements Runnable {
     }
 
     public void recreateTable(Map<String, Types> fields) throws SQLException {
-        Statement stmt = conn.createStatement();
-        try {
+        try (Statement stmt = conn.createStatement()){
             String table = getName();
 
             // first drop table
             String query = "DROP TABLE IF EXISTS " + table;
-            if (DNT.isLogQueries()) {
-                LOG.info(query);
+            if (DNT.isVerbose()) {
+                System.out.println(query);
             }
 
             stmt.executeUpdate(query);
@@ -61,13 +56,12 @@ public abstract class AbstractParser implements Runnable {
             }
             query += ")";
 
-            if (DNT.isLogQueries()) {
-                LOG.info(query);
+            if (DNT.isVerbose()) {
+                System.out.println(query);
             }
 
             stmt.executeUpdate(query);
             this.fields = fields; // since this was all okay, we'll keep it for inserting later
-        } finally {
             stmt.close();
         }
     }
@@ -112,13 +106,13 @@ public abstract class AbstractParser implements Runnable {
                 }
             }
 
-            if (DNT.isLogQueries()) {
-                LOG.info(stmt.toString());
+            if (DNT.isVerbose()) {
+                System.out.println(stmt.toString());
             }
 
             stmt.executeUpdate();
         } catch (SQLException e) {
-            LOG.warn(stmt.toString());
+            System.err.println(stmt.toString());
             throw e;
         } finally {
             stmt.close();
@@ -134,11 +128,11 @@ public abstract class AbstractParser implements Runnable {
     @Override
     public void run() {
         try {
-            LOG.info("START: Creating " + getName() + " from " + file.getAbsolutePath());
             parse();
-            LOG.info("END: Creating " + getName() + " from " + file.getAbsolutePath());
+            System.out.println("Created " + getName() + " from " + file.getAbsolutePath());
         } catch (Exception e) {
-            LOG.error("There was an error when parsing " + file.getAbsolutePath(), e);
+            System.err.println("There was an error when parsing " + file.getAbsolutePath());
+            e.printStackTrace();
         }
     }
 

@@ -62,12 +62,12 @@
 				<configuration>
 					<programs>
 						<program>
-							<mainClass>dnss.tools.dnt.sql.Main</mainClass>
-							<id>dnt-sql</id>
+							<mainClass>dnss.tools.dnt.processor.Main</mainClass>
+							<id>dnt-processor</id>
 						</program>
 						<program>
-							<mainClass>dnss.tools.dnt.sql.collector.Main</mainClass>
-							<id>sql-collector</id>
+							<mainClass>dnss.tools.dnt.collector.Main</mainClass>
+							<id>skilltree-collector</id>
 						</program>
 					</programs>
 				</configuration>

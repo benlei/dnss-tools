@@ -1,7 +1,4 @@
-package dnss.tools.dnt.sql;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package dnss.tools.dnt.processor;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -15,10 +12,8 @@ import java.util.Map;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 import static java.nio.channels.FileChannel.MapMode.READ_ONLY;
 
-public class DNTParser extends AbstractParser {
-    private final static Logger LOG = LoggerFactory.getLogger(DNTParser.class);
-
-    public DNTParser(Connection conn, File file) {
+public class DNTProcessor extends AbstractProcessor {
+    public DNTProcessor(Connection conn, File file) {
         super(conn, file);
     }
 
@@ -52,13 +47,13 @@ public class DNTParser extends AbstractParser {
                         values.add(new String(bytes));
                         break;
                     case BOOLEAN:
-                        values.add(new Boolean(buf.getInt() != 0));
+                        values.add(buf.getInt() != 0);
                         break;
                     case INTEGER:
-                        values.add(new Integer(buf.getInt()));
+                        values.add(buf.getInt());
                         break;
                     case FLOAT:
-                        values.add(new Float(buf.getFloat()));
+                        values.add(buf.getFloat());
                         break;
                 }
             }
@@ -66,7 +61,8 @@ public class DNTParser extends AbstractParser {
             try {
                 insert(values);
             } catch (SQLException e) {
-                LOG.warn(e.getMessage(), e);
+                System.err.println(e.getMessage());
+                e.printStackTrace();
             }
         }
 
@@ -79,10 +75,5 @@ public class DNTParser extends AbstractParser {
         String name = super.getName();
         name = name.substring(0, name.length() - 4); // remove extension
         return name;
-    }
-
-    @Override
-    public String toString() {
-        return "DNT-" + getName();
     }
 }

@@ -1,6 +1,6 @@
-package dnss.tools.dnt.sql.collector.pojo;
+package dnss.tools.dnt.collector.pojo;
 
-import dnss.tools.dnt.sql.collector.Apply;
+import dnss.tools.dnt.collector.Apply;
 
 public class Level {
     private int sp;

@@ -1,10 +1,9 @@
-package dnss.tools.dnt.sql.collector;
+package dnss.tools.dnt.collector;
 
-import dnss.tools.dnt.sql.collector.pojo.Level;
-import dnss.tools.dnt.sql.collector.pojo.Skill;
-import dnss.tools.dnt.sql.collector.pojo.SkillTree;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import dnss.tools.dnt.DNT;
+import dnss.tools.dnt.collector.pojo.Level;
+import dnss.tools.dnt.collector.pojo.Skill;
+import dnss.tools.dnt.collector.pojo.SkillTree;
 
 import java.net.URL;
 import java.nio.file.Files;
@@ -20,7 +19,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Collector implements Runnable {
-    private final static Logger LOG = LoggerFactory.getLogger(Collector.class);
     private Apply apply;
     private Connection conn;
     private static final Map<String, SkillTree> skillTrees = new ConcurrentHashMap<>();
@@ -28,19 +26,19 @@ public class Collector implements Runnable {
 
     private String table;
     private final static String template;
-    private static Map<Integer, String> uiString;
 
     static {
         String str = null;
         try {
-            URL resource = Collector.class.getClassLoader().getResource("sql/collector.sql");
+            URL resource = Collector.class.getClassLoader().getResource("collector.sql");
             if (resource != null) {
                 str = new String(Files.readAllBytes(Paths.get(resource.toURI())));
             } else {
-                LOG.error("resource/sql/collector.sql could not be loaded.");
+                System.err.println("collector.sql could not be loaded.");
             }
         } catch (Exception e) {
-            LOG.error("Template Loader Error: " + e.getMessage(), e);
+            System.err.println("Template Loader Error: " + e.getMessage());
+            e.printStackTrace();
         } finally {
             template = str;
         }
@@ -56,13 +54,13 @@ public class Collector implements Runnable {
         return skillTrees;
     }
 
-    public static void setUiString(Map<Integer,String> uiString) {
-        Collector.uiString = uiString;
-    }
-
     public void collect() throws SQLException {
         Statement stmt = conn.createStatement();
         String query = String.format(template, table, apply.type);
+
+        if (DNT.isVerbose()) {
+            System.out.println(query);
+        }
 
         try (ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
@@ -164,18 +162,18 @@ public class Collector implements Runnable {
                             matcher.reset(param);
                             if (matcher.matches()) { // get parameters uistrings
                                 int mid = Integer.valueOf(matcher.group(1));
-                                uiString.put(mid, Collector.uiString.get(mid));
+                                uiString.put(mid, UIString.get(mid));
                             }
                         }
                     }
                 }
 
                 // get skill name and the explanation for skill too
-                uiString.put(nameID, Collector.uiString.get(nameID));
-                uiString.put(explanationID, Collector.uiString.get(explanationID));
+                uiString.put(nameID, UIString.get(nameID));
+                uiString.put(explanationID, UIString.get(explanationID));
             }
         } catch (SQLException e) { // catch it to also record the query.
-            LOG.warn(query);
+            System.err.println(query);
             throw e;
         }
     }
@@ -185,12 +183,8 @@ public class Collector implements Runnable {
         try {
             collect();
         } catch (SQLException e) {
-            LOG.warn(e.getMessage(), e);
+            System.err.println(e.getMessage());
+            e.printStackTrace();
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Collector-"+table;
     }
 }

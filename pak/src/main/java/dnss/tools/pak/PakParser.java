@@ -1,8 +1,4 @@
-package dnss.tools.pak.extract;
-
-import dnss.tools.pak.Pak;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package dnss.tools.pak;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +16,6 @@ import java.util.regex.Pattern;
 import static java.nio.ByteOrder.LITTLE_ENDIAN;
 
 public class PakParser implements Runnable {
-    private static final Logger log = LoggerFactory.getLogger(PakContent.class);
     public static final String HEADER = "EyedentityGames Packing File 0.1";
     public static final long START_POS = 260;
     private static Map<String, File> map = new ConcurrentHashMap<String, File>();
@@ -29,7 +24,6 @@ public class PakParser implements Runnable {
     private boolean done;
 
     private int totalFiles;
-    private AtomicInteger ignoredFiles = new AtomicInteger(0);
     private AtomicInteger skippedFiles = new AtomicInteger(0);
     private AtomicInteger extractedFiles = new AtomicInteger(0);
 
@@ -56,11 +50,11 @@ public class PakParser implements Runnable {
         try {
             channel.read(header);
             if (!Arrays.equals(headerBytes, HEADER.getBytes())) {
-                log.error("Invalid dnt file header, aborting parsing " + file.getAbsolutePath());
+                System.err.println("Invalid dnt file header, aborting parsing " + file.getAbsolutePath());
                 return;
             }
         } catch (IOException e) {
-            log.error("Could not read file, aborting parsing " + file.getAbsolutePath());
+            System.err.println("Could not read file, aborting parsing " + file.getAbsolutePath());
             return;
         }
 
@@ -95,11 +89,11 @@ public class PakParser implements Runnable {
                 path = new String(pathBytes);
                 path = path.substring(0, path.indexOf('\0')).trim();
 
-                if (isExtractable(path)) {
+                if (! isExtractable(path) || (! Pak.isKeepDeleted() && fileSize == 0)) {
+                    incrementSkippedFiles();
+                } else {
                     PakContent content = new PakContent(this, path, resolve(path), fileSize, compressedSize, streamOffset);
                     queue.add(content);
-                } else {
-                    incrementIgnoredFiles();
                 }
                 parsed++;
             }
@@ -120,14 +114,6 @@ public class PakParser implements Runnable {
 
     public int getTotalFiles() {
         return totalFiles;
-    }
-
-    public int getIgnoredFiles() {
-        return ignoredFiles.get();
-    }
-
-    public void incrementIgnoredFiles() {
-        ignoredFiles.incrementAndGet();
     }
 
     public int getSkippeddFiles() {
@@ -151,7 +137,7 @@ public class PakParser implements Runnable {
     }
 
     private File resolve(String destination) {
-        File dir = new File(Pak.getDestination(), destination);
+        File dir = new File(Pak.getOutput(), destination);
         if (! map.containsKey(dir.getAbsolutePath())) {
             map.put(dir.getAbsolutePath(), dir);
         }
@@ -188,14 +174,10 @@ public class PakParser implements Runnable {
         try {
             parse();
         } catch (IOException e) {
-            log.error("Could not parse " + file.getAbsolutePath(), e);
+            System.err.println("Could not parse " + file.getAbsolutePath());
+            e.printStackTrace();
         } finally {
             done = true;
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Parser-" + getPakName();
     }
 }

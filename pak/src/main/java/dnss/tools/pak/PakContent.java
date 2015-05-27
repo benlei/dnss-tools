@@ -1,8 +1,4 @@
-package dnss.tools.pak.extract;
-
-import dnss.tools.pak.Pak;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package dnss.tools.pak;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -10,7 +6,6 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
 public class PakContent implements Runnable {
-    private static final Logger LOG = LoggerFactory.getLogger(PakContent.class);
     private final PakParser parser;
     private final String pakPath;
     private final File destination;
@@ -56,17 +51,6 @@ public class PakContent implements Runnable {
 
 
     public void extract() throws IOException, DataFormatException {
-        Pak.Log log = Pak.getLog();
-        String outputPakPath = pakPath;
-
-        if (Pak.isSkipDeleted() && fileSize == 0) {
-            if (log.showDeleted()) {
-                LOG.warn("[d] " + destination.getAbsolutePath());
-            }
-            parser.incrementSkippedFiles();
-            return;
-        }
-
         // Creating directory must be synchronized on all threads
         synchronized (directoryLock) {
             try {
@@ -75,7 +59,8 @@ public class PakContent implements Runnable {
                     dir.mkdirs();
                 }
             } catch (SecurityException e) {
-                LOG.error("[z] " + destination.getAbsolutePath() + ": " + e.getMessage(), e);
+                System.err.println(e.getMessage());
+                e.printStackTrace();
                 parser.incrementSkippedFiles();
                 return;
             }
@@ -104,22 +89,22 @@ public class PakContent implements Runnable {
             // if file exists already, then just rename it
             if (destination.exists() && ! Pak.isOverwrite()) {
                 int i = 1;
-                int extPos = outputPakPath.lastIndexOf('.'); // include the . as well for extension-less file case
+                int extPos = pakPath.lastIndexOf('.'); // include the . as well for extension-less file case
                 File outputFile;
                 if (extPos == -1) {
-                    extPos = outputPakPath.length();
+                    extPos = pakPath.length();
                 }
 
-                String fileWithoutExt = outputPakPath.substring(0, extPos);
-                String fileExt = outputPakPath.substring(extPos);
+                String fileWithoutExt = pakPath.substring(0, extPos);
+                String fileExt = pakPath.substring(extPos);
                 do {
                     // file has format of ${destinationWithoutExtension}+${i}${ext}
-                    outputFile = new File(Pak.getDestination(), fileWithoutExt + "+" + i + fileExt);
+                    outputFile = new File(Pak.getOutput(), fileWithoutExt + "+" + i + fileExt);
                     i++;
                 } while (outputFile.exists());
 
                 Files.move(destination.toPath(), outputFile.toPath());
-                LOG.info("Moved " + destination.getAbsolutePath() + " to " + outputFile.getAbsolutePath());
+                System.out.println("Moved " + destination.getAbsolutePath() + " to " + outputFile.getAbsolutePath());
             }
 
             FileOutputStream outStream = new FileOutputStream(destination);
@@ -127,8 +112,8 @@ public class PakContent implements Runnable {
             outStream.close();
         }
 
-        if (log.showExtracted()) {
-            LOG.info("[x] " + destination.getAbsolutePath());
+        if (Pak.isVerbose()) {
+            System.out.println("[x] " + destination.getAbsolutePath());
         }
         parser.incrementExtractedFiles();
     }
@@ -138,13 +123,9 @@ public class PakContent implements Runnable {
         try {
             extract();
         } catch (Exception e) {
-            LOG.warn("Could not extract to " + destination.getAbsolutePath() + ": " + e.getMessage(), e);
+            System.err.println("Could not extract to " + destination.getAbsolutePath() + ": " + e.getMessage());
+            e.printStackTrace();
             parser.incrementSkippedFiles();
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Content-" + parser.getPakName();
     }
 }

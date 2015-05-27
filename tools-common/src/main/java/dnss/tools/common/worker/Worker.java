@@ -19,7 +19,7 @@ public class Worker extends Thread {
 
     public static void startWorkers() {
         for (int i = 0; i < workers.length; i++) {
-            workers[i] = new Worker();
+            workers[i] = new Worker(); // can't re-use dead threads
             workers[i].start();
         }
     }
@@ -42,7 +42,6 @@ public class Worker extends Thread {
                 continue;
             }
 
-            Thread.currentThread().setName(runnable.toString());
             runnable.run();
         }
     }
