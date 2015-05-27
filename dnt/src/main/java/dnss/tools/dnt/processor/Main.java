@@ -18,10 +18,6 @@ import java.util.prefs.Preferences;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        if (args.length != 1) {
-            return;
-        }
-
         long startTime = System.currentTimeMillis();
 
         CommandLineParser parser = new DefaultParser();
@@ -33,6 +29,7 @@ public class Main {
 
         options.addOption(Option.builder("f")
                 .longOpt("file")
+                .hasArg()
                 .desc("Specific file to process. Specify more of this option to process multiple DNT files.")
                 .build());
 
