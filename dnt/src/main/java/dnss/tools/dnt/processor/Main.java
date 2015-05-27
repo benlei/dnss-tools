@@ -45,8 +45,9 @@ public class Main {
         List<String> remaining = cli.getArgList();
 
         if (remaining.size() != 1 || cli.hasOption('h')) {
-            new HelpFormatter().printHelp("dnt-processor", "DNSS processor processes, by default, the DNT " +
-                            "skillleveltables and inserts all of its content into a database. This program " +
+            new HelpFormatter().printHelp("dnt-processor", "DNSS processor processes DNT files and inserts all " +
+                            "of its content into a database. If the file option is not specified, all the " +
+                            "{resource.location}/resource/ext/*.dnt files will be processored. This program " +
                             "requires an ini file to be specified in its arguments.",
                     options, null, true);
             return;
