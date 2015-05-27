@@ -94,9 +94,7 @@ public class Main {
         ObjectMapper mapper = new ObjectMapper();
         for (Map.Entry<String, SkillTree> entry : skillTrees.entrySet()) {
             File output = new File(ext, entry.getKey().toLowerCase() + ".json");
-            if (DNT.isVerbose()) {
-                System.out.println("Creating " + output.getAbsolutePath());
-            }
+            System.out.println("Creating " + output.getAbsolutePath());
             mapper.writeValue(output, entry.getValue());
         }
 
