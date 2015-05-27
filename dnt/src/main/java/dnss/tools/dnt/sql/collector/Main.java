@@ -1,9 +1,9 @@
-package dnss.tools.dnt.sql.collector.json.frontend;
+package dnss.tools.dnt.sql.collector;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dnss.tools.common.worker.Worker;
 import dnss.tools.dnt.DNT;
-import dnss.tools.dnt.sql.collector.json.frontend.mappings.SkillTree;
+import dnss.tools.dnt.sql.collector.pojo.SkillTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

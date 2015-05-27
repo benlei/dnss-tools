@@ -1,4 +1,4 @@
-package dnss.tools.dnt.sql.collector.json.frontend.mappings;
+package dnss.tools.dnt.sql.collector.pojo;
 
 import java.util.Map;
 

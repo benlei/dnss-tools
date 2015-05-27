@@ -1,8 +1,8 @@
-package dnss.tools.dnt.sql.collector.json.frontend;
+package dnss.tools.dnt.sql.collector;
 
-import dnss.tools.dnt.sql.collector.json.frontend.mappings.Level;
-import dnss.tools.dnt.sql.collector.json.frontend.mappings.Skill;
-import dnss.tools.dnt.sql.collector.json.frontend.mappings.SkillTree;
+import dnss.tools.dnt.sql.collector.pojo.Level;
+import dnss.tools.dnt.sql.collector.pojo.Skill;
+import dnss.tools.dnt.sql.collector.pojo.SkillTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,8 +18,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static dnss.tools.dnt.sql.collector.json.frontend.mappings.Level.Mode;
 
 public class Collector implements Runnable {
     private final static Logger LOG = LoggerFactory.getLogger(Collector.class);
@@ -152,7 +150,7 @@ public class Collector implements Runnable {
                 }
 
                 // although a pvp/pve thread may call this method, it's for two different instance variables.
-                Mode mode = level.createOrGetMode(apply);
+                Level.Mode mode = level.createOrGetMode(apply);
                 mode.setMp(mp);
                 mode.setCd(cd);
                 mode.setExplanationID(explanationID);
