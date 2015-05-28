@@ -68,7 +68,6 @@ public class Collector implements Runnable {
                 int lvl = rs.getInt("_SkillLevel");
                 String slug = rs.getString("_EnglishName").toLowerCase();
                 int advancement = rs.getInt("_JobNumber");
-                int icon = rs.getInt("_IconImageIndex");
                 int nameID = rs.getInt("_NameID");
                 int type = rs.getInt("_SkillType");
                 int weapon1 = rs.getInt("_NeedWeaponType1");
@@ -127,7 +126,6 @@ public class Collector implements Runnable {
                         skill.setBasicSP(basicSP);
                         skill.setFirstSP(firstSP);
                         skill.setSlot(slot);
-                        skill.setIcon(icon);
 
                         skills.put(id, skill);
                     }

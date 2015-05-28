@@ -6,7 +6,6 @@ public class Skill {
     private int id;
     private int nameID;
     private Map<Integer, Level> levels;
-    private int icon;
     private int type;
     private int weapon1;
     private int weapon2;
@@ -40,14 +39,6 @@ public class Skill {
 
     public void setLevels(Map<Integer, Level> levels) {
         this.levels = levels;
-    }
-
-    public int getIcon() {
-        return icon;
-    }
-
-    public void setIcon(int icon) {
-        this.icon = icon;
     }
 
     public int getType() {
