@@ -12,7 +12,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -49,7 +51,7 @@ public class Collector implements Runnable {
         this.apply = apply;
         this.conn = conn;
     }
-    
+
     public static Map<String, SkillTree> getSkillTrees() {
         return skillTrees;
     }
@@ -65,7 +67,7 @@ public class Collector implements Runnable {
         try (ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
                 int id = rs.getInt("_SkillTableID");
-                int lvl = rs.getInt("_SkillLevel");
+                int lvl = rs.getInt("_SkillLevel") - 1;
                 String slug = rs.getString("_EnglishName").toLowerCase();
                 int advancement = rs.getInt("_JobNumber");
                 int nameID = rs.getInt("_NameID");
@@ -105,24 +107,31 @@ public class Collector implements Runnable {
                 }
 
                 Map<Integer, Skill> skills = skillTree.getSkills();
-                Map<Integer, Level> levels;
+                List<Level> levels;
                 synchronized (skills) { // sync condition for when a pvp or pve thread wants to create the skill
                     if (skills.containsKey(id)) {
                         levels = skills.get(id).getLevels();
                     } else {
                         Skill skill = new Skill();
-                        levels = new HashMap<>();
-
+                        levels = new ArrayList<>();
                         skill.setId(id);
                         skill.setNameID(nameID);
                         skill.setLevels(levels);
                         skill.setType(type);
-                        skill.setWeapon1(weapon1);
-                        skill.setWeapon2(weapon2);
-                        skill.setParentID1(parentID1);
-                        skill.setParentLevel1(parentLevel1);
-                        skill.setParentID2(parentID2);
-                        skill.setParentLevel2(parentLevel2);
+                        if (weapon1 == -1 && weapon2 != -1) {
+                            skill.setWeapons(Integer.toString(weapon2));
+                        } else if (weapon1 != -1 && weapon2 == -1) {
+                            skill.setWeapons(Integer.toString(weapon1));
+                        } else if (weapon1 != -1) {
+                            skill.setWeapons(weapon1 + "," + weapon2);
+                        }
+
+                        if (parentID2 != 0) {
+                            skill.setParents(parentID1 + ":" + parentLevel1 + "," + parentID2 + ":" + parentLevel2);
+                        } else if (parentID1 != 0) {
+                            skill.setParents(parentID1 + ":" + parentLevel1);
+                        }
+
                         skill.setBasicSP(basicSP);
                         skill.setFirstSP(firstSP);
                         skill.setSlot(slot);
@@ -133,24 +142,78 @@ public class Collector implements Runnable {
 
                 Level level;
                 synchronized (levels) { // sync for when a pvp and pve thread wants to create/get the level
-                    if (levels.containsKey(lvl)) {
-                        level = levels.get(lvl);
+                    if (lvl < levels.size() && levels.get(lvl) != null) {
+                        level = levels.get(lvl );
                     } else {
                         level = new Level();
 
                         level.setSp(sp);
                         level.setLimit(limit);
 
-                        levels.put(lvl, level);
+                        ensureSize(levels, lvl);
+                        levels.set(lvl, level);
                     }
                 }
 
-                // although a pvp/pve thread may call this method, it's for two different instance variables.
-                Level.Mode mode = level.createOrGetMode(apply);
-                mode.setMp(mp);
-                mode.setCd(cd);
-                mode.setExplanationID(explanationID);
-                mode.setExplanationParams(explanationParams);
+                synchronized (level) {
+                    String lMP = level.getMp();
+                    String lCD = level.getCd();
+                    String lEID = level.getExplanationID();
+                    String lEP = level.getExplanationParams();
+
+                    if (lMP == null) {
+                        level.setMp(String.valueOf(mp));
+                    } else if(! lMP.equals(String.valueOf(mp))) {
+                        switch (apply) {
+                            case PvE:
+                                level.setMp(mp + "," + lMP);
+                                break;
+                            case PvP:
+                                level.setMp(lMP + "," + mp);
+                                break;
+                        }
+                    }
+
+                    if (lCD == null) {
+                        level.setCd(String.valueOf(cd));
+                    } else if (! lCD.equals(String.valueOf(cd))) {
+                        switch (apply) {
+                            case PvE:
+                                level.setCd(cd + "," + lCD);
+                                break;
+                            case PvP:
+                                level.setCd(lCD + "," + cd);
+                                break;
+                        }
+                    }
+
+                    if (lEID == null) {
+                        level.setExplanationID(String.valueOf(explanationID));
+                    } else if (! lEID.equals(String.valueOf(explanationID))) {
+                        switch (apply) {
+                            case PvE:
+                                level.setExplanationID(explanationID + "," + lEID);
+                                break;
+                            case PvP:
+                                level.setExplanationID(lEID + "," + explanationID);
+                                break;
+                        }
+                    }
+
+                    if (lEP == null) {
+                        level.setExplanationParams(explanationParams);
+                    } else if (! lEP.equals(explanationParams)) {
+                        switch (apply) {
+                            case PvE:
+                                level.setExplanationParams(explanationParams + "|" + lEP);
+                                break;
+                            case PvP:
+                                level.setExplanationParams(lEP + "|" + explanationParams);
+                                break;
+                        }
+                    }
+                }
+
 
                 Map<Integer, String> uiString = skillTree.getUiString();
                 if (explanationParams != null) {
@@ -173,6 +236,17 @@ public class Collector implements Runnable {
         } catch (SQLException e) { // catch it to also record the query.
             System.err.println(query);
             throw e;
+        }
+    }
+
+
+    private void ensureSize(List list, int size) {
+        if (size < list.size()) {
+            return;
+        }
+
+        for (int i = list.size(); i <= size; i++) {
+            list.add(null);
         }
     }
 

@@ -5,8 +5,10 @@ import dnss.tools.dnt.collector.Apply;
 public class Level {
     private int sp;
     private int limit;
-    private Mode pvp;
-    private Mode pve;
+    private String explanationID;
+    private String explanationParams;
+    private String mp;
+    private String cd;
 
     public int getSp() {
         return sp;
@@ -24,75 +26,35 @@ public class Level {
         this.limit = limit;
     }
 
-    public Mode getPvp() {
-        return pvp;
+    public String getExplanationID() {
+        return explanationID;
     }
 
-    public void setPvp(Mode pvp) {
-        this.pvp = pvp;
+    public void setExplanationID(String explanationID) {
+        this.explanationID = explanationID;
     }
 
-    public Mode getPve() {
-        return pve;
+    public String getExplanationParams() {
+        return explanationParams;
     }
 
-    public void setPve(Mode pve) {
-        this.pve = pve;
+    public void setExplanationParams(String explanationParams) {
+        this.explanationParams = explanationParams;
     }
 
-    public Mode createOrGetMode(Apply type) {
-        switch (type) {
-            case PvE:
-                if (pve == null) {
-                    pve = new Mode();
-                }
-                return pve;
-            case PvP:
-                if (pvp == null) {
-                    pvp = new Mode();
-                }
-                return pvp;
-        }
-
-        throw new RuntimeException("Invalid mode");
+    public String getMp() {
+        return mp;
     }
 
-    public static class Mode {
-        private int explanationID;
-        private String explanationParams;
-        private double mp;
-        private double cd;
+    public void setMp(String mp) {
+        this.mp = mp;
+    }
 
-        public int getExplanationID() {
-            return explanationID;
-        }
+    public String getCd() {
+        return cd;
+    }
 
-        public void setExplanationID(int explanationID) {
-            this.explanationID = explanationID;
-        }
-
-        public String getExplanationParams() {
-            return explanationParams;
-        }
-
-        public void setExplanationParams(String explanationParams) {
-            this.explanationParams = explanationParams;
-        }
-
-        public double getMp() {
-            return mp;
-        }
-
-        public void setMp(double mp) {
-            this.mp = mp;
-        }
-
-        public double getCd() {
-            return cd;
-        }
-
-        public void setCd(double cd) {
-            this.cd = cd;
-        }
+    public void setCd(String cd) {
+        this.cd = cd;
     }
 }

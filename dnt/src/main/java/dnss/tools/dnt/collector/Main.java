@@ -69,17 +69,24 @@ public class Main {
         // Get all skill tables
         DatabaseMetaData metaData = conn.getMetaData();
         Queue<Runnable> queue = DNT.getQueue();
+        Set<String> set = new HashSet<>();
         Worker.setQueue(queue);
         try(ResultSet rs = metaData.getTables(null, null, "skillleveltable\\_character%", null)) {
             while (rs.next()) {
                 String table = rs.getString(3);
-                if (! table.endsWith("characteretc")) {
+                if (table.endsWith("_pkey")) { //postgresql :(
+                    table = table.substring(0, table.length() - 5);
+                }
+
+
+                if (! set.contains(table) && ! table.endsWith("characteretc")) {
                     if (! table.endsWith("pve")) { // must be a PvP table if not pve (or DA)
                         queue.add(new Collector(table, Apply.PvP, conn));
                     }
                     if (! table.endsWith("pvp")) { // must be a PvE table if not pvp (or DA)
                         queue.add(new Collector(table, Apply.PvE, conn));
                     }
+                    set.add(table);
                 }
             }
             rs.close();
