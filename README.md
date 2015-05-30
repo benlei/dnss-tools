@@ -35,13 +35,3 @@ As a note to self:
 The 20 x 10 equally spaced skill icon grid is referenced by an index.
 Index 0 refers to the first icon, 1 refers to to the one to the right of it, etc.
 Index 10 refers to the second row, first item. Index 11 refers to the one to the right of it, etc.
-
-### Installing nokogiri gem on Windows using Cygwin
-`apt-cyg install ruby-nokogiri`
-
-### Installing pg gem (do not use cygwin's ruby-pg) on Windows using Cygwin
-`apt-cyg install postgresql postgresql-devel libpq-devel make gcc-core`
-
-`gem install pg`
-
-Note: Using postgresql is only for the support of the Heroku branch of DNSS. Can either use MySQL, PostgreSQL, or SQLite.
