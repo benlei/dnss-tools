@@ -9,6 +9,7 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>dnss-dnt</artifactId>
+	<name>DN Tools - DNT Tools</name>
 
 	<properties>
 		<postgresql.version>9.4-1201-jdbc41</postgresql.version>
@@ -20,7 +21,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>dnss</groupId>
-			<artifactId>tools-common</artifactId>
+			<artifactId>common</artifactId>
 			<version>2.0</version>
 		</dependency>
 		<dependency>
@@ -63,11 +64,11 @@
 					<programs>
 						<program>
 							<mainClass>dnss.tools.dnt.processor.Main</mainClass>
-							<id>dnt-processor</id>
+							<id>processor</id>
 						</program>
 						<program>
 							<mainClass>dnss.tools.dnt.collector.Main</mainClass>
-							<id>skilltree-collector</id>
+							<id>collector</id>
 						</program>
 					</programs>
 				</configuration>
