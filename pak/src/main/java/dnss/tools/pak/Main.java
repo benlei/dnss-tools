@@ -63,7 +63,7 @@ public class Main {
         long startTime = System.currentTimeMillis();
         CommandLineParser parser = new DefaultParser();
         Options options = new Options();
-        options.addOption(Option.builder("i")
+        options.addOption(Option.builder()
                 .longOpt("ini")
                 .hasArg()
                 .desc("Ini file properties for specific extra configuration.")
