@@ -5,6 +5,7 @@ import dnss.tools.dnt.collector.pojo.Level;
 import dnss.tools.dnt.collector.pojo.Skill;
 import dnss.tools.dnt.collector.pojo.SkillTree;
 
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -31,13 +32,10 @@ public class Collector implements Runnable {
 
     static {
         String str = null;
-        try {
-            URL resource = Collector.class.getClassLoader().getResource("collector.sql");
-            if (resource != null) {
-                str = new String(Files.readAllBytes(Paths.get(resource.toURI())));
-            } else {
-                System.err.println("collector.sql could not be loaded.");
-            }
+        try (InputStream resource = Collector.class.getClassLoader().getResourceAsStream("collector.sql")) {
+            byte[] bytes = new byte[resource.available()];
+            resource.read(bytes);
+            str = new String(bytes);
         } catch (Exception e) {
             System.err.println("Template Loader Error: " + e.getMessage());
             e.printStackTrace();
