@@ -137,7 +137,7 @@ public class PakParser implements Runnable {
     }
 
     private File resolve(String destination) {
-        File dir = new File(Pak.getOutput(), destination);
+        File dir = new File(Pak.getOutput(), destination.replace('\\', '/'));
         if (! map.containsKey(dir.getAbsolutePath())) {
             map.put(dir.getAbsolutePath(), dir);
         }

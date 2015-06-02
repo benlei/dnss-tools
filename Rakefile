@@ -34,13 +34,14 @@ task :update do
     tmp = Dir.mktmpdir
     ((version+1)..server_version).each do |v|
       download = $ini["patch"]["download"] % v
+      puts "Download #{download}"
       filename = download.split("/")[-1]
       open("#{tmp}/#{filename}", "wb") do |pak|
         open(download) {|f| pak << f.read}
       end
     end
 
-    sh "pak", "-s", "--ini", $pak, "-O", $static, tmp
+    sh "pak", "-s", "-o",  "--ini", $pak, "-O", $static, tmp
 
     Rake::Task["dnt"].reenable
     Rake::Task["dnt"].invoke
