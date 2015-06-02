@@ -34,7 +34,7 @@ task :update do
     tmp = Dir.mktmpdir
     ((version+1)..server_version).each do |v|
       download = $ini["patch"]["download"] % v
-      puts "Download #{download}"
+      puts "Downloading #{download}"
       filename = download.split("/")[-1]
       open("#{tmp}/#{filename}", "wb") do |pak|
         open(download) {|f| pak << f.read}

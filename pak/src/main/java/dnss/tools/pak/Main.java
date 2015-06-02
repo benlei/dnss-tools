@@ -200,6 +200,8 @@ public class Main {
             for (File source : sources) {
                 PakParser pakParser = new PakParser(source);
                 pakParsers.add(pakParser);
+
+                System.out.println("\nExtracting " + source.getAbsolutePath());
                 queue.add(pakParser); // add parser to queue
 
                 // keep going if queue has items or pak parser is still finding files to extract
@@ -211,6 +213,7 @@ public class Main {
             for (File source : sources) {
                 PakParser pakParser = new PakParser(source);
                 pakParsers.add(pakParser);
+                System.out.println("\nWill be extracting " + source.getAbsolutePath());
                 queue.add(pakParser); // add parser to queue
             }
 
@@ -236,7 +239,6 @@ public class Main {
         int total = 0, extracted = 0, skipped = 0;
         String format = "%s = %d";
         for (PakParser pakParser : pakParsers) {
-            System.out.println("Finished extracting " + pakParser.getFile().getPath());
             total += pakParser.getTotalFiles();
             extracted += pakParser.getExtractedFiles();
             skipped += pakParser.getSkippeddFiles();
