@@ -7,7 +7,7 @@ $ini_path = "#{ENV['HOME']}/.dn"
 $patch = "#{$ini_path}/patch.ini"
 $pak = "#{$ini_path}/pak.ini"
 $dnt = "#{$ini_path}/dnt.ini"
-$static = "/var/www/static"
+$static = "#{ENV['HOME']}/static"
 
 fail "You need a #{$patch} with proper configurations set."  unless File.exists?($patch)
 fail "You need a #{$pak} with proper configurations set." unless File.exists?($pak)
