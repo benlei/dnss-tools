@@ -113,7 +113,11 @@ public class PakContent implements Runnable {
         }
 
         if (Pak.isVerbose()) {
-            System.out.println("[x] " + destination.getAbsolutePath() + " from " + parser.getFile().getAbsolutePath());
+            if (Pak.isSingly()) {
+                System.out.println("[x] " + destination.getAbsolutePath());
+            } else {
+                System.out.println("[x] " + destination.getAbsolutePath() + " < " + parser.getFile().getAbsolutePath());
+            }
         }
         parser.incrementExtractedFiles();
     }
