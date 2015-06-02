@@ -43,7 +43,7 @@ task :update do
     end
 
     sh "pak", "-s", "-o",  "--ini", $pak, "-O", $static, tmp
-    open("#{$static}/version.cfg") {|cfg| cfg << version_b.gsub(version, server_version)}
+    open("#{$static}/version.cfg") {|cfg| cfg << version_b.gsub(version.to_s, server_version.to_s)}
 
     Rake::Task["dnt"].reenable
     Rake::Task["dnt"].invoke
