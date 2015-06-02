@@ -44,9 +44,15 @@ task :update do
   end
 end
 
-task :dnt do
-  sh "processor", $dnt
-  sh "collector", $dnt
+task :dnt => ["dnt:process", "dnt:collect"]
+namespace :dnt do
+  task :process do
+    sh "processor", $dnt
+  end
+
+  task :collect do
+    sh "collector", $dnt
+  end
 end
 
 task :images do
