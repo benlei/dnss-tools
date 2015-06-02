@@ -112,9 +112,9 @@ public class Main {
             return;
         }
 
-        if (cli.hasOption("--ini")) {
+        if (cli.hasOption("ini")) {
             InputStream input;
-            File file = new File(cli.getOptionValue("--ini"));
+            File file = new File(cli.getOptionValue("ini"));
             System.out.println("Loading properties from " + file.getPath());
             input = new FileInputStream(file);
             loadIniProperties(input);
