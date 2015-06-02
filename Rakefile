@@ -18,7 +18,7 @@ puts "Loading #{$patch}"
 $ini = IniFile.load($patch)
 
 desc("Does a full update of the pak files and updates the JSON and pushing to git.")
-task :default => [:update, :dnt, :images]
+task :default => [:update]
 
 desc("Attempts to update the pak to the latest version")
 task :update do
@@ -41,6 +41,12 @@ task :update do
     end
 
     sh "pak", "-s", "--ini", $pak, "-O", $static, tmp
+
+    Rake::Task["dnt"].reenable
+    Rake::Task["dnt"].invoke
+
+    Rake::Task["images"].reenable
+    Rake::Task["images"].invoke
   end
 end
 
