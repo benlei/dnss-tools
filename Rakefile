@@ -25,7 +25,7 @@ task :update do
   fail "Cannot find version.cfg file: #{$static}/version.cfg" unless File.exists?("#{$static}/version.cfg")
 
   # get the versions
-  version = File.readlines("#{$static}/version.config")[0].strip[8..-1].to_i
+  version = File.readlines("#{$static}/version.cfg")[0].strip[8..-1].to_i
   server_version = open($ini["patch"]["version"]) {|f| f.read.strip[8..-1].to_i}
 
   if version == server_version
