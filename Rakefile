@@ -25,7 +25,8 @@ task :update do
   fail "Cannot find version.cfg file: #{$static}/version.cfg" unless File.exists?("#{$static}/version.cfg")
 
   # get the versions
-  version = File.readlines("#{$static}/version.cfg")[0].strip[8..-1].to_i
+  version_b = File.readlines("#{$static}/version.cfg")[0]
+  version = version_b.strip[8..-1].to_i
   server_version = open($ini["patch"]["version"]) {|f| f.read.strip[8..-1].to_i}
 
   if version == server_version
@@ -42,6 +43,7 @@ task :update do
     end
 
     sh "pak", "-s", "-o",  "--ini", $pak, "-O", $static, tmp
+    open("#{$static}/version.cfg") {|cfg| cfg << version_b.gsub(version, server_version)}
 
     Rake::Task["dnt"].reenable
     Rake::Task["dnt"].invoke
