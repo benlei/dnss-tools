@@ -86,7 +86,7 @@ public class Main {
                 queue.add(new DNTProcessor(conn, file));
             }
         } else {
-            File root = new File(ini.node("resource").get("location", null));
+            File root = new File(ini.node("common").get("output", null));
             File ext = new File(root, "resource/ext");
             List<File> files = Arrays.asList(ext.listFiles((dir, name) -> name.endsWith(".dnt")));
 

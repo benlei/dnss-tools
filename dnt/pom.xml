@@ -12,10 +12,10 @@
 	<name>DN Tools - DNT Tools</name>
 
 	<properties>
-		<postgresql.version>9.4-1201-jdbc41</postgresql.version>
-		<mysql.version>5.1.35</mysql.version>
-		<sqlite.version>3.8.10.1</sqlite.version>
-		<jackson.version>2.5.3</jackson.version>
+		<postgresql>9.4-1201-jdbc41</postgresql>
+		<mysql>5.1.35</mysql>
+		<sqlite>3.8.10.1</sqlite>
+		<jackson>2.5.3</jackson>
 	</properties>
 
 	<dependencies>
@@ -27,53 +27,53 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>${postgresql.version}</version>
+			<version>${postgresql}</version>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>${mysql.version}</version>
+			<version>${mysql}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xerial</groupId>
 			<artifactId>sqlite-jdbc</artifactId>
-			<version>${sqlite.version}</version>
+			<version>${sqlite}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>${jackson.version}</version>
+			<version>${jackson}</version>
 		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>appassembler-maven-plugin</artifactId>
-				<version>1.9</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>assemble</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<programs>
-						<program>
-							<mainClass>dnss.tools.dnt.processor.Main</mainClass>
-							<id>processor</id>
-						</program>
-						<program>
-							<mainClass>dnss.tools.dnt.collector.Main</mainClass>
-							<id>collector</id>
-						</program>
-					</programs>
-				</configuration>
-			</plugin>
-		</plugins>
+		<plugin>
+			<groupId>org.codehaus.mojo</groupId>
+			<artifactId>appassembler-maven-plugin</artifactId>
+			<version>1.9</version>
+			<executions>
+				<execution>
+					<phase>package</phase>
+					<goals>
+						<goal>assemble</goal>
+					</goals>
+				</execution>
+			</executions>
+			<configuration>
+				<programs>
+					<program>
+						<mainClass>dnss.tools.dnt.processor.Main</mainClass>
+						<id>processor</id>
+					</program>
+					<program>
+						<mainClass>dnss.tools.dnt.collector.Main</mainClass>
+						<id>collector</id>
+					</program>
+				</programs>
+			</configuration>
+		</plugin>
+	</plugins>
 	</build>
 
 </project>

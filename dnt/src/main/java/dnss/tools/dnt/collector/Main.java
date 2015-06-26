@@ -64,7 +64,7 @@ public class Main {
         }
 
         // load the uistring
-        UIString.setup(new File(ini.node("resource").get("location", null), "resource/uistring/uistring.xml"));
+        UIString.setup(new File(ini.node("common").get("output", null), "resource/uistring/uistring.xml"));
 
         // Get all skill tables
         DatabaseMetaData metaData = conn.getMetaData();
@@ -96,7 +96,7 @@ public class Main {
         Worker.awaitTermination();
 
         System.out.println();
-        File ext = new File(ini.node("resource").get("location", null), "resource/ext");
+        File ext = new File(ini.node("common").get("output", null), "resource/ext");
         Map<String, SkillTree> skillTrees = Collector.getSkillTrees();
         ObjectMapper mapper = new ObjectMapper();
         for (Map.Entry<String, SkillTree> entry : skillTrees.entrySet()) {
