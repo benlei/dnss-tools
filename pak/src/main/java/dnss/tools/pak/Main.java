@@ -107,7 +107,7 @@ public class Main {
         List<String> remaining = cli.getArgList();
 
         // if there is no ini and no specific pak file to parse
-        if((remaining.size() == 0 && ! cli.hasOption('i')) || cli.hasOption('h')) {
+        if((remaining.size() == 0 && ! cli.hasOption("ini")) || cli.hasOption('h')) {
             new HelpFormatter().printHelp("pak", "Dragon Nest Resource.pak extractor program.", options, null, true);
             return;
         }

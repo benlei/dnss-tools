@@ -3,22 +3,13 @@ require "inifile"
 require "open-uri"
 require "tmpdir"
 
-$ini_path = "#{ENV['HOME']}/.dn"
-$patch = "#{$ini_path}/patch.ini"
-$pak = "#{$ini_path}/pak.ini"
-$dnt = "#{$ini_path}/dnt.ini"
-$static = "#{ENV['HOME']}/static"
+DNSS_INI = "#{ENV['HOME']}/dnss.ini"
 
-fail "You need a #{$patch} with proper configurations set."  unless File.exists?($patch)
-fail "You need a #{$pak} with proper configurations set." unless File.exists?($pak)
-fail "You need a #{$dnt} with proper configurations set." unless File.exists?($dnt)
-fail "Please git clone your region's static files to #{$static}" unless File.exists?($static)
-
-puts "Loading #{$patch}"
-$ini = IniFile.load($patch)
+$ini = IniFile.load(DNSS_INI)
+$static = $ini['common']['output']
 
 desc("Does a full update of the pak files and updates the JSON and pushing to git.")
-task :default => [:update]
+task :default => :update
 
 desc("Attempts to update the pak to the latest version")
 task :update do
@@ -42,7 +33,7 @@ task :update do
       end
     end
 
-    sh "pak", "-s", "-o",  "--ini", $pak, "-O", $static, tmp
+    sh "pak", "-s", "-o", "--ini", DNSS_INI, "-O", $static, tmp
     open("#{$static}/version.cfg", "wb") {|cfg| cfg << version_b.gsub(version.to_s, server_version.to_s)}
 
     Rake::Task["dnt"].reenable
@@ -56,11 +47,11 @@ end
 task :dnt => ["dnt:process", "dnt:collect"]
 namespace :dnt do
   task :process do
-    sh "processor", $dnt
+    sh "processor", DNSS_INI
   end
 
   task :collect do
-    sh "collector", $dnt
+    sh "collector", DNSS_INI
   end
 end
 
