@@ -67,7 +67,7 @@ public class Main {
         DNT.setVerbose(sql.getBoolean("verbose", DNT.isVerbose()));
 
         // auto commit off
-        conn.setAutoCommit(false);
+        conn.setAutoCommit(true);
 
         // start queueing up the jobs
         Queue<Runnable> queue = DNT.getQueue();

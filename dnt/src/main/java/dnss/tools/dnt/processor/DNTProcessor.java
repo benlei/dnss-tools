@@ -44,7 +44,7 @@ public class DNTProcessor extends AbstractProcessor {
                     case STRING:
                         byte[] bytes = new byte[buf.getShort()];
                         buf.get(bytes);
-                        values.add(new String(bytes));
+                        values.add(new String(bytes).replaceAll("\u0000", ""));
                         break;
                     case BOOLEAN:
                         values.add(buf.getInt() != 0);
