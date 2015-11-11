@@ -29,7 +29,7 @@ public class DNTProcessor extends AbstractProcessor {
         int numRows = buf.getInt();
 
         Map<String, Types> fields = new LinkedHashMap<>();
-        fields.put("_ID", Types.INTEGER);
+        fields.put("_PrimaryID", Types.INTEGER);
         for (int i = 0; i < numCols; i++) {
             byte[] fieldNameBytes = new byte[buf.getShort()];
             buf.get(fieldNameBytes);
