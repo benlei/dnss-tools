@@ -5,7 +5,8 @@ Here is where I make some tools I plan to be using for the Dragon Nest Skill Sim
 Pak Extracter
 
 DNT Processor
-SQL Collector
+
+SQL Collector (deprecated)
 
 ## How To Extract Template - Basis
 See ResourceUnpacker.bms
